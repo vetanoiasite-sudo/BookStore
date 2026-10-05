@@ -5,6 +5,7 @@ import type { BookListItem } from '../../core/models/book';
 import { BookService } from '../../core/services/book.service';
 import { SeoService } from '../../core/services/seo.service';
 import { BookCard, BookCardSkeleton } from '../../shared/ui/book-card';
+import { HomeHero } from './hero/home-hero';
 
 /** How many copies each home page strip shows. */
 const STRIP_SIZE = 8;
@@ -18,7 +19,7 @@ type StripState = 'loading' | 'ready' | 'error';
  */
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, TranslatePipe, BookCard, BookCardSkeleton],
+  imports: [RouterLink, TranslatePipe, BookCard, BookCardSkeleton, HomeHero],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })

@@ -9,79 +9,263 @@
 
 // --- Header ---------------------------------------------------------------
 
+// One white bar: brand, the links centred in the space left over, account actions at the end.
 .header {
   position: sticky;
   inset-block-start: 0;
   z-index: 20;
   background: var(--bs-surface);
-  border-block-end: 1px solid var(--bs-border);
 }
 
 .header__bar {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--bs-space-4);
-  min-height: var(--bs-header-height);
+  height: var(--bs-header-height);
 }
 
 .brand {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   gap: var(--bs-space-2);
   color: var(--bs-primary);
-  font-weight: 700;
 
   &:hover {
+    color: var(--bs-primary-hover);
     text-decoration: none;
   }
 }
 
+// The mark keeps the logo's own proportions at the bar's height.
 .brand__mark {
-  display: grid;
-  place-items: center;
+  display: block;
+  width: auto;
+  height: 3.125rem;
 }
 
 .brand__name {
   font-family: var(--bs-font-display);
-  font-size: var(--bs-text-xl);
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: -0.05em;
   white-space: nowrap;
+}
 
-  @include m.until(t.$bs-bp-sm) {
-    // The mark alone carries the brand once the bar gets tight.
-    @include m.visually-hidden;
+// --- Navigation -----------------------------------------------------------
+
+.nav {
+  @include m.from(t.$bs-bp-lg) {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    // Keeps the links clear of the brand and the actions however tight the bar gets.
+    padding-inline: clamp(var(--bs-space-4), 2vw, 2.5rem);
+  }
+
+  @include m.until(t.$bs-bp-lg) {
+    // A drawer under the bar on small screens; the toggle opens it.
+    position: absolute;
+    inset-block-start: 100%;
+    inset-inline: 0;
+    display: none;
+    padding: var(--bs-space-4);
+    background: var(--bs-surface);
+    box-shadow: var(--bs-shadow-header);
+
+    &.nav--open {
+      display: grid;
+      gap: var(--bs-space-4);
+    }
   }
 }
 
+.nav__list {
+  display: flex;
+  align-items: center;
+  // Even gaps between the tabs: about 48px on a wide screen, closing up as it narrows.
+  gap: clamp(var(--bs-space-4), 6vw - 2.5rem, var(--bs-space-7));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  @include m.until(t.$bs-bp-lg) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+
+  a {
+    display: block;
+    padding-block: var(--bs-space-3);
+    color: var(--bs-primary);
+    font-family: var(--bs-font-display);
+    font-size: var(--bs-text-base);
+    font-weight: 400;
+    line-height: 1.5;
+    text-transform: uppercase;
+    white-space: nowrap;
+
+    &:hover {
+      color: var(--bs-primary-hover);
+      text-decoration: none;
+    }
+
+    @include m.until(t.$bs-bp-lg) {
+      border-block-end: 1px solid var(--bs-border);
+    }
+  }
+}
+
+// The current page is set bolder and tighter, underlined in purple.
+.nav__list a.nav__link--active {
+  font-size: var(--bs-text-sm);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  box-shadow: inset 0 -4px 0 var(--bs-primary);
+}
+
+// Links and actions that only belong in the small-screen drawer.
+.nav__drawer-only,
+.nav__drawer-actions {
+  @include m.from(t.$bs-bp-lg) {
+    display: none !important;
+  }
+}
+
+.nav__drawer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bs-space-3);
+}
+
+// --- Actions --------------------------------------------------------------
+
 .header__actions {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   gap: var(--bs-space-2);
   margin-inline-start: auto;
 }
 
-// The basket and the saved list are the two things a shopper reaches for most, so
-// they sit in the header as icons rather than behind a menu.
+.header__account {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+
+  @include m.until(t.$bs-bp-lg) {
+    display: none;
+  }
+}
+
+// Filled purple with yellow type, as the design's "Register now!".
+.header__cta,
+.header__outline {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.7rem 0.875rem;
+  border: 1px solid var(--bs-primary);
+  border-radius: var(--bs-radius-sm);
+  box-shadow: var(--bs-shadow-sm);
+  font-family: var(--bs-font-display);
+  font-size: var(--bs-text-sm);
+  font-weight: 700;
+  line-height: 1.63;
+  letter-spacing: 0.143em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--bs-transition),
+    color var(--bs-transition);
+
+  &:hover {
+    text-decoration: none;
+  }
+
+  &:focus-visible {
+    @include m.focus-ring;
+  }
+}
+
+.header__cta {
+  background: var(--bs-primary);
+  color: var(--bs-highlight);
+
+  &:hover {
+    background: var(--bs-primary-hover);
+    color: var(--bs-highlight);
+  }
+}
+
+// Outlined in purple, as the design's "Sign in".
+.header__outline {
+  background: transparent;
+  color: var(--bs-primary);
+
+  &:hover {
+    background: var(--bs-primary);
+    color: var(--bs-highlight);
+  }
+}
+
+.header__language {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bs-space-2);
+  padding: var(--bs-space-2);
+  border: 0;
+  background: transparent;
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-sm);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--bs-primary);
+  }
+}
+
+// The flag of the language the button switches to, cropped to a 3:2 card.
+.header__flag {
+  display: block;
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1rem;
+  border-radius: var(--bs-radius-sm);
+  object-fit: cover;
+  box-shadow: 0 0 0 1px var(--bs-border);
+}
+
+// Search, saved books and the basket, as quiet icons beside the actions.
 .header__icon {
   position: relative;
   display: grid;
   place-items: center;
   width: 2.25rem;
   height: 2.25rem;
+  padding: 0;
+  border: 0;
   border-radius: var(--bs-radius-pill);
-  color: var(--bs-text-muted);
+  background: transparent;
+  color: var(--bs-primary);
+  cursor: pointer;
 
   &:hover {
-    background: var(--bs-surface-muted);
-    color: var(--bs-primary);
+    background: var(--bs-primary-soft);
     text-decoration: none;
+  }
+
+  &[aria-expanded='true'] {
+    background: var(--bs-primary-soft);
   }
 }
 
 .header__icon--active {
-  color: var(--bs-primary);
+  background: var(--bs-primary-soft);
 }
 
 .header__badge {
@@ -100,24 +284,6 @@
   text-align: center;
 }
 
-.header__language {
-  padding: var(--bs-space-2) var(--bs-space-3);
-  border: 1px solid var(--bs-border);
-  border-radius: var(--bs-radius-pill);
-  background: transparent;
-  color: var(--bs-text-muted);
-  font-size: var(--bs-text-sm);
-  cursor: pointer;
-  transition:
-    border-color var(--bs-transition),
-    color var(--bs-transition);
-
-  &:hover {
-    border-color: var(--bs-primary);
-    color: var(--bs-primary);
-  }
-}
-
 .header__toggle {
   display: grid;
   place-items: center;
@@ -125,7 +291,7 @@
   border: 1px solid var(--bs-border);
   border-radius: var(--bs-radius-sm);
   background: transparent;
-  color: var(--bs-text);
+  color: var(--bs-primary);
   cursor: pointer;
 
   @include m.from(t.$bs-bp-lg) {
@@ -135,139 +301,37 @@
 
 // --- Search ---------------------------------------------------------------
 
+.search-panel {
+  padding-block: var(--bs-space-3);
+  border-block-start: 1px solid var(--bs-border);
+  background: var(--bs-surface);
+}
+
 .search {
   display: flex;
   align-items: center;
   gap: var(--bs-space-2);
-  flex: 1;
-  max-width: 520px;
-  padding: 0 var(--bs-space-2) 0 0;
-  border: 2px solid var(--bs-border);
-  border-radius: var(--bs-radius-md);
-  background: var(--bs-bg);
-  transition: border-color var(--bs-transition);
-
-  &:focus-within {
-    border-color: var(--bs-primary);
-  }
-}
-
-.search--desktop {
-  @include m.until(t.$bs-bp-lg) {
-    display: none;
-  }
-}
-
-.search--mobile {
-  max-width: none;
-  margin-block-end: var(--bs-space-4);
-
-  @include m.from(t.$bs-bp-lg) {
-    display: none;
-  }
 }
 
 .search__input {
   flex: 1;
   min-width: 0;
   padding: var(--bs-space-3) var(--bs-space-4);
-  border: 0;
-  border-radius: inherit;
-  background: transparent;
+  border: 2px solid var(--bs-border);
+  border-radius: var(--bs-radius-md);
+  background: var(--bs-bg);
   font-size: var(--bs-text-sm);
+  transition: border-color var(--bs-transition);
 
   &:focus {
+    border-color: var(--bs-primary);
     outline: none;
   }
 }
 
 .search__button {
   @include m.button-base;
-  padding: var(--bs-space-2) var(--bs-space-4);
-  box-shadow: none;
-}
-
-// --- Navigation -----------------------------------------------------------
-
-// The purple menu bar, as on SuperPark: white links, the current one marked in yellow.
-.nav {
-  background: var(--bs-primary);
-  color: var(--bs-text-inverse);
-
-  @include m.until(t.$bs-bp-lg) {
-    // Collapsed by default on small screens; the toggle opens it.
-    display: none;
-
-    &.nav--open {
-      display: block;
-      padding-block: var(--bs-space-4);
-    }
-  }
-}
-
-.nav__inner {
-  display: flex;
-  align-items: center;
-  gap: var(--bs-space-5);
-
-  @include m.until(t.$bs-bp-lg) {
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--bs-space-3);
-  }
-}
-
-.nav__list {
-  display: flex;
-  align-items: center;
-  gap: var(--bs-space-5);
-
-  @include m.until(t.$bs-bp-lg) {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0;
-  }
-
-  a {
-    display: block;
-    padding-block: var(--bs-space-3);
-    position: relative;
-    color: var(--bs-text-inverse);
-    font-family: var(--bs-font-display);
-    font-size: var(--bs-text-sm);
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-
-    &:hover {
-      color: var(--bs-highlight);
-      text-decoration: none;
-    }
-
-    @include m.until(t.$bs-bp-lg) {
-      border-block-end: 1px solid rgb(255 255 255 / 15%);
-    }
-  }
-}
-
-.nav__link--active {
-  color: var(--bs-highlight) !important;
-  font-weight: 700 !important;
-
-  @include m.from(t.$bs-bp-lg) {
-    box-shadow: inset 0 -4px 0 var(--bs-highlight);
-  }
-}
-
-.nav__sell {
-  @include m.button-base;
-  @include m.button-highlight;
-  margin-inline-start: auto;
-  padding: var(--bs-space-2) var(--bs-space-5);
-
-  @include m.until(t.$bs-bp-lg) {
-    margin-inline-start: 0;
-  }
+  padding: var(--bs-space-3) var(--bs-space-5);
 }
 
 // --- Main and footer ------------------------------------------------------
@@ -332,52 +396,3 @@
   font-size: var(--bs-text-xs);
 }
 
-// Signed-out visitors get a way in from the header; signed-in ones get a way
-// back to whichever workspace they belong to.
-.header__signin,
-.header__workspace {
-  font-size: var(--bs-text-sm);
-  white-space: nowrap;
-}
-
-.nav__signin,
-.nav__signout {
-  display: inline-block;
-  margin-block-start: var(--bs-space-3);
-  font-size: var(--bs-text-sm);
-}
-
-// Signing out is a plain action, not a call to action: it borrows the quiet outline
-// of the language switch next to it rather than competing with the sell button.
-.header__signout,
-.nav__signout {
-  padding: var(--bs-space-2) var(--bs-space-3);
-  border: 1px solid var(--bs-border);
-  border-radius: var(--bs-radius-pill);
-  background: transparent;
-  color: var(--bs-text-muted);
-  font: inherit;
-  font-size: var(--bs-text-sm);
-  white-space: nowrap;
-  cursor: pointer;
-  transition:
-    border-color var(--bs-transition),
-    color var(--bs-transition);
-
-  &:hover {
-    border-color: var(--bs-primary);
-    color: var(--bs-primary);
-  }
-}
-
-// Inside the purple menu the quiet actions switch to light outlines.
-.nav .nav__signout,
-.nav .nav__signin {
-  border-color: rgb(255 255 255 / 40%);
-  color: var(--bs-text-inverse);
-
-  &:hover {
-    border-color: var(--bs-highlight);
-    color: var(--bs-highlight);
-  }
-}

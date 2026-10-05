@@ -19,6 +19,9 @@
     />
   </head>
   <body>
-    <app-root></app-root>
+    <!-- Holds the brand purple while the app boots; Angular replaces it with the preloader. -->
+    <app-root
+      ><div style="position: fixed; inset: 0; background: linear-gradient(var(--bs-scrim) 0 0), var(--bs-primary-light)"></div
+    ></app-root>
   </body>
 </html>

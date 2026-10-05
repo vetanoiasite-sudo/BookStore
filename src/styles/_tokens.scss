@@ -31,6 +31,8 @@
   --bs-ink: #22182c;
   --bs-ink-deep: #200d28;
   --bs-mint: #2ae2a3;
+  // Plum veil laid over brand purple to darken full-bleed imagery (the preloader).
+  --bs-scrim: rgb(19 4 32 / 50%);
 
   // Feedback
   --bs-success: #117c57;
@@ -44,6 +46,7 @@
   --bs-shadow-sm: 0 1px 4px rgb(0 0 0 / 10%);
   --bs-shadow-md: 0 6px 18px rgb(34 24 44 / 12%);
   --bs-shadow-lg: 0 14px 34px rgb(34 24 44 / 16%);
+  --bs-shadow-header: 0 4px 1px rgb(102 102 102 / 20%);
 
   // Spacing scale (4px base)
   --bs-space-1: 0.25rem;
@@ -76,7 +79,7 @@
 
   // Layout
   --bs-container: 1200px;
-  --bs-header-height: 72px;
+  --bs-header-height: 70px;
 
   --bs-transition: 200ms ease;
 }

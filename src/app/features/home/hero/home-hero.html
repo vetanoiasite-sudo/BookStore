@@ -1,0 +1,47 @@
+<section
+  class="hero"
+  aria-roledescription="carousel"
+  [attr.aria-label]="'home.hero.carousel' | t"
+  (mouseenter)="hold(true)"
+  (mouseleave)="hold(false)"
+  (focusin)="hold(true)"
+  (focusout)="hold(false)"
+  (pointerdown)="swipeStart($event)"
+  (pointerup)="swipeEnd($event)"
+>
+  <div class="hero__slides">
+    @for (slide of slides; track slide; let i = $index) {
+      <div #slide class="hero__slide" [class.is-active]="i === 0">
+        <div class="hero__stage">
+          <img
+            class="hero__image"
+            [src]="slide"
+            alt=""
+            [attr.fetchpriority]="i === 0 ? 'high' : null"
+            [attr.loading]="i === 0 ? 'eager' : 'lazy'"
+            decoding="async"
+          />
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="hero__content">
+    <h1 #title class="hero__title">
+      @for (word of titleWords(); track $index) {
+        <span class="hero__word"><span class="hero__word-inner">{{ word }}</span></span>
+        {{ ' ' }}
+      }
+    </h1>
+    <p #lead class="hero__lead">{{ 'home.hero.lead' | t }}</p>
+
+    <div #actions class="hero__actions">
+      <a class="hero__button hero__button--browse" routerLink="/books">
+        {{ 'home.hero.browse' | t }}
+      </a>
+      <a class="hero__button hero__button--sell" routerLink="/seller/books/new">
+        {{ 'home.hero.sell' | t }}
+      </a>
+    </div>
+  </div>
+</section>

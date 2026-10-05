@@ -1,0 +1,68 @@
+// The curtain is one viewport tall plus the depth of its curved lower edge, so at
+// rest the curve hangs just below the fold and the screen is fully covered.
+.preloader {
+  --curve: clamp(5rem, 22vh, 14rem);
+
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: 100;
+  height: calc(100vh + var(--curve));
+  height: calc(100dvh + var(--curve));
+  overflow: hidden;
+  // Brand purple under the scrim: the same colour the photo is baked onto.
+  background: linear-gradient(var(--bs-scrim) 0 0), var(--bs-primary-light);
+  border-end-start-radius: 50% var(--curve);
+  border-end-end-radius: 50% var(--curve);
+  will-change: transform;
+}
+
+// Exactly one viewport, so the lockup centres on the screen and not on the curtain.
+.preloader__stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  will-change: transform;
+}
+
+// The purple soft-light wash and the scrim are baked into the image, so no blend
+// mode or extra layer has to be composited while it moves.
+.preloader__backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+// Logo beside the name. Sizes follow the 1920px frame and shrink with the viewport.
+.preloader__lockup {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(var(--bs-space-3), 1.25vw, var(--bs-space-5));
+  padding-inline: var(--bs-space-4);
+}
+
+.preloader__logo {
+  display: block;
+  flex-shrink: 0;
+  width: auto;
+  height: clamp(5.5rem, 12.7vw, 15.25rem);
+}
+
+.preloader__name {
+  margin: 0;
+  font-family: var(--bs-font-display);
+  font-size: clamp(2.25rem, 5.08vw, 6.1rem);
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: -0.05em;
+  color: var(--bs-text-inverse);
+  white-space: nowrap;
+}

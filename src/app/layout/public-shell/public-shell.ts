@@ -43,6 +43,9 @@ export class PublicShell {
   /** Whether the mobile navigation drawer is open. */
   protected readonly menuOpen = signal(false);
 
+  /** Whether the search field under the header bar is showing. */
+  protected readonly searchOpen = signal(false);
+
   /** What is currently typed in the header search box. */
   protected readonly searchTerm = signal('');
 
@@ -54,6 +57,10 @@ export class PublicShell {
 
   protected closeMenu(): void {
     this.menuOpen.set(false);
+  }
+
+  protected toggleSearch(): void {
+    this.searchOpen.update((open) => !open);
   }
 
   protected async switchLanguage(): Promise<void> {
@@ -69,6 +76,7 @@ export class PublicShell {
 
     const term = this.searchTerm().trim();
     this.closeMenu();
+    this.searchOpen.set(false);
 
     void this.router.navigate(['/books'], {
       queryParams: term ? { q: term } : {},

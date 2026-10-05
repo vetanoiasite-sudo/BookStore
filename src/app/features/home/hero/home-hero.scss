@@ -1,0 +1,160 @@
+@use 'mixins' as m;
+
+// Full-bleed photo carousel with the tagline centred over it, one window tall.
+.hero {
+  // Depth of a photo's curved edge while it lifts away; the preloader uses the same shape.
+  --curve: clamp(4rem, 10vw, 12rem);
+
+  position: relative;
+  display: grid;
+  place-items: center;
+  // Fills the window under the sticky header, so the first screen is all hero.
+  height: calc(100svh - var(--bs-header-height));
+  min-height: 30rem;
+  overflow: hidden;
+  background: linear-gradient(var(--bs-scrim) 0 0), var(--bs-primary-light);
+  color: var(--bs-text-inverse);
+  touch-action: pan-y;
+}
+
+// --- Slides ---------------------------------------------------------------
+
+.hero__slides {
+  position: absolute;
+  inset: 0;
+}
+
+.hero__slide {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  visibility: hidden;
+  will-change: transform;
+
+  &.is-active {
+    z-index: 1;
+    visibility: visible;
+  }
+
+  // The photo being replaced becomes a curtain over the next one: one hero tall plus
+  // the curve, rounded on the edge that leads the way out.
+  &.is-leaving {
+    z-index: 2;
+    visibility: visible;
+  }
+
+  &.is-leaving--up {
+    inset-block: 0 auto;
+    height: calc(100% + var(--curve));
+    border-end-start-radius: 50% var(--curve);
+    border-end-end-radius: 50% var(--curve);
+  }
+
+  &.is-leaving--down {
+    inset-block: auto 0;
+    height: calc(100% + var(--curve));
+    border-start-start-radius: 50% var(--curve);
+    border-start-end-radius: 50% var(--curve);
+  }
+}
+
+// Always exactly one hero tall, so the photo does not move when the curtain grows.
+.hero__stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  will-change: transform;
+
+  .is-leaving--up > & {
+    inset-block-end: var(--curve);
+  }
+
+  .is-leaving--down > & {
+    inset-block-start: var(--curve);
+  }
+}
+
+// The dark scrim from the design is baked into each photo.
+.hero__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  will-change: transform;
+}
+
+// --- Copy -----------------------------------------------------------------
+
+.hero__content {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: calc(47.625rem + 2 * var(--bs-space-6));
+  padding: var(--bs-space-7) var(--bs-space-6);
+  text-align: center;
+}
+
+.hero__title {
+  margin: 0;
+  color: var(--bs-highlight);
+  font-family: var(--bs-font-display);
+  font-size: clamp(2rem, 1.4rem + 1.9vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+// Each word rises out of its own line box, so it appears from behind an invisible edge.
+.hero__word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  // Room for descenders and Arabic marks that would otherwise be clipped.
+  padding-block: 0.06em;
+  margin-block: -0.06em;
+}
+
+.hero__word-inner {
+  display: inline-block;
+  will-change: transform;
+}
+
+.hero__lead {
+  max-width: 24rem;
+  margin: var(--bs-space-4) 0 0;
+  color: rgb(255 255 255 / 88%);
+  font-family: var(--bs-font-display);
+  font-size: var(--bs-text-lg);
+  font-weight: 500;
+  line-height: 1.67;
+  text-wrap: balance;
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--bs-space-3);
+  padding-block-start: var(--bs-space-6);
+}
+
+.hero__button {
+  @include m.button-base;
+  padding: var(--bs-space-3) 1.875rem;
+}
+
+.hero__button--browse {
+  @include m.button-highlight;
+}
+
+.hero__button--sell {
+  background: var(--bs-primary-hover);
+  color: var(--bs-text-inverse);
+
+  &:hover:not(:disabled) {
+    background: var(--bs-primary);
+    color: var(--bs-text-inverse);
+  }
+}
