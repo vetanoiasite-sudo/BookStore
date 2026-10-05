@@ -1,0 +1,71 @@
+<h1 class="title">{{ 'auth.register' | t }}</h1>
+<p class="lead">{{ 'auth.register.lead' | t }}</p>
+
+<form class="bs-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  @if (failure(); as message) {
+    <p class="alert" role="alert">{{ message }}</p>
+  }
+
+  <div class="bs-field">
+    <label class="bs-label" for="displayName">{{ 'auth.displayName' | t }}</label>
+    <input
+      id="displayName"
+      class="bs-input"
+      type="text"
+      autocomplete="name"
+      formControlName="displayName"
+      [attr.aria-invalid]="form.controls.displayName.touched && form.controls.displayName.invalid"
+    />
+    @if (errorFor('displayName'); as message) {
+      <p class="bs-error">{{ message }}</p>
+    } @else if (form.controls.displayName.touched && form.controls.displayName.invalid) {
+      <p class="bs-error">{{ 'auth.error.displayName' | t }}</p>
+    }
+  </div>
+
+  <div class="bs-field">
+    <label class="bs-label" for="email">{{ 'auth.email' | t }}</label>
+    <input
+      id="email"
+      class="bs-input"
+      type="email"
+      autocomplete="email"
+      formControlName="email"
+      [attr.aria-invalid]="form.controls.email.touched && form.controls.email.invalid"
+    />
+    @if (errorFor('email'); as message) {
+      <p class="bs-error">{{ message }}</p>
+    } @else if (form.controls.email.touched && form.controls.email.invalid) {
+      <p class="bs-error">{{ 'auth.error.email' | t }}</p>
+    }
+  </div>
+
+  <div class="bs-field">
+    <label class="bs-label" for="password">{{ 'auth.password' | t }}</label>
+    <input
+      id="password"
+      class="bs-input"
+      type="password"
+      autocomplete="new-password"
+      formControlName="password"
+      [attr.aria-invalid]="form.controls.password.touched && form.controls.password.invalid"
+    />
+    <p class="bs-hint">{{ 'auth.passwordHint' | t }}</p>
+    @if (errorFor('password'); as message) {
+      <p class="bs-error">{{ message }}</p>
+    } @else if (form.controls.password.touched && form.controls.password.invalid) {
+      <p class="bs-error">{{ 'auth.error.password' | t }}</p>
+    }
+  </div>
+
+  <p class="bs-hint">{{ 'auth.registerAsSeller.hint' | t }}</p>
+
+  <button class="bs-button bs-button--block" type="submit" [disabled]="submitting()">
+    {{ (submitting() ? 'auth.registering' : 'auth.register') | t }}
+  </button>
+</form>
+
+<p class="switch">
+  {{ 'auth.haveAccount' | t }}
+  <a routerLink="/auth/login">{{ 'auth.signIn' | t }}</a>
+</p>

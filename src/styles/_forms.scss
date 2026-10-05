@@ -1,0 +1,249 @@
+// Form and button primitives shared by every signed-in screen. They live here
+// rather than in a component stylesheet because the seller form, the review panel
+// and the sign-in card all present the same controls, and three private copies of
+// the same rules would drift apart the first time one of them changed.
+
+@use 'tokens' as t;
+@use 'mixins' as m;
+
+.bs-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bs-space-4);
+}
+
+// A label, its control, and the message that appears when the control is wrong.
+.bs-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bs-space-1);
+}
+
+.bs-label {
+  font-size: var(--bs-text-sm);
+  font-weight: 600;
+}
+
+.bs-hint {
+  margin: 0;
+  font-size: var(--bs-text-xs);
+  color: var(--bs-text-muted);
+}
+
+.bs-input,
+.bs-select,
+.bs-textarea {
+  width: 100%;
+  padding: var(--bs-space-2) var(--bs-space-3);
+  border: 1px solid var(--bs-border-strong);
+  border-radius: var(--bs-radius-sm);
+  background: var(--bs-surface);
+  font-size: var(--bs-text-sm);
+  transition: border-color var(--bs-transition);
+
+  &:hover {
+    border-color: var(--bs-primary);
+  }
+
+  &:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 3px var(--bs-primary-soft);
+  }
+
+  &[aria-invalid='true'] {
+    border-color: var(--bs-danger);
+  }
+
+  &:disabled {
+    background: var(--bs-surface-muted);
+    color: var(--bs-text-muted);
+    cursor: not-allowed;
+  }
+}
+
+.bs-textarea {
+  min-height: 6rem;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.bs-error {
+  margin: 0;
+  font-size: var(--bs-text-xs);
+  color: var(--bs-danger);
+}
+
+// A row of checkboxes, as used by the condition section of the seller form.
+.bs-check {
+  display: flex;
+  align-items: center;
+  gap: var(--bs-space-2);
+  font-size: var(--bs-text-sm);
+
+  input {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--bs-primary);
+  }
+}
+
+.bs-button {
+  @include m.button-base;
+
+  &--ghost {
+    @include m.button-outline;
+  }
+
+  &--highlight {
+    @include m.button-highlight;
+  }
+
+  &--danger {
+    background: var(--bs-danger);
+    color: var(--bs-text-inverse);
+
+    &:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--bs-danger) 85%, black);
+      color: var(--bs-text-inverse);
+    }
+  }
+
+  &--block {
+    width: 100%;
+  }
+}
+
+// The surface every panel on a signed-in screen sits on.
+.bs-card {
+  padding: var(--bs-space-5);
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius-lg);
+  background: var(--bs-surface);
+}
+
+.bs-card__title {
+  margin: 0 0 var(--bs-space-4);
+  font-size: var(--bs-text-lg);
+}
+
+// A page heading with its actions on the opposite side.
+.bs-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--bs-space-4);
+  margin-block-end: var(--bs-space-5);
+
+  h1 {
+    margin: 0;
+    font-size: var(--bs-text-2xl);
+  }
+
+  p {
+    margin: var(--bs-space-1) 0 0;
+    color: var(--bs-text-muted);
+    font-size: var(--bs-text-sm);
+  }
+}
+
+.bs-page-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bs-space-2);
+}
+
+// A plain data table, used by the seller list and the review queue.
+.bs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--bs-text-sm);
+
+  th,
+  td {
+    padding: var(--bs-space-3);
+    border-block-end: 1px solid var(--bs-border);
+    text-align: start;
+    vertical-align: middle;
+  }
+
+  th {
+    color: var(--bs-primary);
+    font-family: var(--bs-font-display);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  tbody tr:hover {
+    background: var(--bs-surface-muted);
+  }
+}
+
+// Wide tables scroll inside their own box rather than pushing the page sideways.
+.bs-table-scroll {
+  overflow-x: auto;
+}
+
+// A row of filters and a search box above a list. Every back-office screen has one,
+// and they behave the same way on each, so the rules live here rather than being
+// copied into eight component stylesheets that would then drift apart.
+.bs-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bs-space-3);
+  margin-block-end: var(--bs-space-4);
+}
+
+.bs-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bs-space-2);
+}
+
+.bs-chip {
+  padding: 0.2rem var(--bs-space-3);
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius-pill);
+  background: var(--bs-surface);
+  font-size: var(--bs-text-sm);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--bs-border-strong);
+  }
+
+  &--active {
+    background: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: var(--bs-highlight);
+    font-weight: 700;
+  }
+}
+
+.bs-search {
+  display: flex;
+  width: 100%;
+  gap: var(--bs-space-2);
+  margin-inline-start: auto;
+
+  .bs-input {
+    min-width: 12rem;
+  }
+
+  // Full width on a phone, where it is the only thing on its row, and beside the
+  // filters on anything wider.
+  @include m.from(t.$bs-bp-md) {
+    width: auto;
+  }
+}
+
+// A quiet line of text under a heading, or in place of a table that has nothing in it.
+.bs-muted {
+  margin: 0;
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-sm);
+}

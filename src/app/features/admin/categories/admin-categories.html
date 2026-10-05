@@ -1,0 +1,174 @@
+<header class="bs-page-header">
+  <div>
+    <h1>{{ 'admin.categories.title' | t }}</h1>
+    <p>{{ 'admin.categories.lead' | t }}</p>
+  </div>
+
+  <div class="bs-page-header__actions">
+    <button type="button" class="bs-button" (click)="startCreate(null)">
+      {{ 'admin.categories.addMain' | t }}
+    </button>
+  </div>
+</header>
+
+@if (editing(); as current) {
+  <section class="bs-card editor" id="category-form">
+    <h2 class="bs-card__title">
+      @if (current.kind === 'create') {
+        @if (current.parent; as parent) {
+          {{ (current.level === 3 ? 'admin.categories.addBranchTo' : 'admin.categories.addSubTo') | t: { name: name(parent) } }}
+        } @else {
+          {{ 'admin.categories.addMain' | t }}
+        }
+      } @else {
+        {{ 'admin.categories.editTitle' | t: { name: name(current.node) } }}
+      }
+    </h2>
+
+    <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+      <div class="editor__fields">
+        <div class="bs-field">
+          <label class="bs-label" for="category-name-ar">{{ 'admin.categories.nameAr' | t }}</label>
+          <input id="category-name-ar" class="bs-input" dir="rtl" formControlName="nameAr" />
+          @if (form.controls.nameAr.touched && form.controls.nameAr.invalid) {
+            <p class="bs-error">{{ 'admin.categories.nameRequired' | t }}</p>
+          }
+        </div>
+
+        <div class="bs-field">
+          <label class="bs-label" for="category-name-en">{{ 'admin.categories.nameEn' | t }}</label>
+          <input id="category-name-en" class="bs-input" dir="ltr" formControlName="nameEn" />
+          @if (form.controls.nameEn.touched && form.controls.nameEn.invalid) {
+            <p class="bs-error">{{ 'admin.categories.nameRequired' | t }}</p>
+          } @else if (current.kind === 'create') {
+            <p class="bs-hint">{{ 'admin.categories.slugHint' | t }}</p>
+          }
+        </div>
+
+        <div class="bs-field">
+          <label class="bs-label" for="category-order">{{ 'admin.categories.sortOrder' | t }}</label>
+          <input
+            id="category-order"
+            class="bs-input"
+            type="number"
+            min="0"
+            max="9999"
+            formControlName="sortOrder"
+          />
+          <p class="bs-hint">{{ 'admin.categories.sortHint' | t }}</p>
+        </div>
+
+        @if (current.kind === 'edit') {
+          <div class="bs-field">
+            <label class="bs-label" for="category-parent">{{ 'admin.categories.parent' | t }}</label>
+            <select id="category-parent" class="bs-select" formControlName="parentId">
+              <option value="">{{ 'admin.categories.noParent' | t }}</option>
+              @for (option of parentOptions(); track option.id) {
+                <option [value]="option.id">{{ option.label }}</option>
+              }
+            </select>
+          </div>
+
+          <label class="bs-check editor__check">
+            <input type="checkbox" formControlName="isActive" />
+            {{ 'admin.categories.visible' | t }}
+          </label>
+        }
+      </div>
+
+      <div class="editor__actions">
+        <button type="submit" class="bs-button" [disabled]="saving()">
+          {{ (current.kind === 'create' ? 'admin.categories.create' : 'common.save') | t }}
+        </button>
+        <button type="button" class="bs-button bs-button--ghost" (click)="cancel()">
+          {{ 'common.cancel' | t }}
+        </button>
+      </div>
+    </form>
+  </section>
+}
+
+@switch (state()) {
+  @case ('loading') {
+    <div class="bs-card skeletons" aria-hidden="true">
+      @for (placeholder of placeholders; track placeholder) {
+        <ui-skeleton width="60%" height="1.2rem" />
+      }
+    </div>
+  }
+
+  @case ('error') {
+    <ui-error-state title="admin.categories.error" text="books.error.text" (retry)="load()" />
+  }
+
+  @default {
+    @if (tree().length === 0) {
+      <ui-empty-state title="admin.categories.empty" text="admin.categories.emptyText" />
+    } @else {
+      <section class="bs-card">
+        <ul class="tree">
+          @for (node of tree(); track node.id) {
+            <ng-container *ngTemplateOutlet="branch; context: { $implicit: node, depth: 0 }" />
+          }
+        </ul>
+      </section>
+    }
+  }
+}
+
+<!-- One category and everything beneath it. Calls itself for the children. -->
+<ng-template #branch let-node let-depth="depth">
+  <li class="node" [class.node--root]="depth === 0">
+    <div class="row" [class.row--hidden]="!node.isActive">
+      <div class="row__name">
+        <span class="row__title">{{ name(node) }}</span>
+        <span class="row__other">{{ translations.language() === 'ar' ? node.nameEn : node.nameAr }}</span>
+      </div>
+
+      <div class="row__meta">
+        <span class="count" [title]="'admin.categories.booksTitle' | t">
+          {{ 'admin.categories.books' | t: { count: node.totalBookCount } }}
+        </span>
+        @if (node.children.length > 0) {
+          <span class="count">
+            {{ (depth === 0 ? 'admin.categories.subCount' : 'admin.categories.branchCount') | t: { count: node.children.length } }}
+          </span>
+        }
+        @if (!node.isActive) {
+          <span class="hidden-badge">{{ 'admin.categories.hidden' | t }}</span>
+        }
+      </div>
+
+      <div class="row__actions">
+        @if (canHaveChildren(depth)) {
+          <button
+            type="button"
+            class="bs-button bs-button--ghost small"
+            (click)="startCreate(node, depth)"
+          >
+            + {{ (depth === 0 ? 'admin.categories.addSub' : 'admin.categories.addBranch') | t }}
+          </button>
+        }
+        <button type="button" class="bs-button bs-button--ghost small" (click)="startEdit(node)">
+          {{ 'common.edit' | t }}
+        </button>
+        <button
+          type="button"
+          class="bs-button bs-button--danger small"
+          [disabled]="busy() === node.id"
+          (click)="remove(node)"
+        >
+          {{ 'common.delete' | t }}
+        </button>
+      </div>
+    </div>
+
+    @if (node.children.length > 0) {
+      <ul class="tree tree--nested">
+        @for (child of node.children; track child.id) {
+          <ng-container *ngTemplateOutlet="branch; context: { $implicit: child, depth: depth + 1 }" />
+        }
+      </ul>
+    }
+  </li>
+</ng-template>

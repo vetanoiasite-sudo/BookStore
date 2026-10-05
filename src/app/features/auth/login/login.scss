@@ -1,0 +1,26 @@
+.title {
+  margin: 0 0 var(--bs-space-1);
+  font-size: var(--bs-text-2xl);
+}
+
+.lead {
+  margin: 0 0 var(--bs-space-5);
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-sm);
+}
+
+.alert {
+  margin: 0;
+  padding: var(--bs-space-3);
+  border-inline-start: 4px solid var(--bs-danger);
+  border-radius: var(--bs-radius-sm);
+  background: #f9ecea;
+  color: var(--bs-danger);
+  font-size: var(--bs-text-sm);
+}
+
+.switch {
+  margin: var(--bs-space-5) 0 0;
+  font-size: var(--bs-text-sm);
+  color: var(--bs-text-muted);
+}

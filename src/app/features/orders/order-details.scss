@@ -1,0 +1,272 @@
+@use 'mixins' as m;
+@use 'tokens' as t;
+
+.order {
+  padding-block: var(--bs-space-6) var(--bs-space-8);
+}
+
+.missing {
+  display: grid;
+  justify-items: start;
+  gap: var(--bs-space-3);
+
+  h1 {
+    margin: 0;
+    font-size: var(--bs-text-xl);
+  }
+
+  p {
+    margin: 0;
+    color: var(--bs-text-muted);
+  }
+}
+
+.status {
+  padding: var(--bs-space-1) var(--bs-space-4);
+  border-radius: var(--bs-radius-pill);
+  background: var(--bs-primary-soft);
+  color: var(--bs-primary);
+  font-size: var(--bs-text-sm);
+  font-weight: 600;
+}
+
+.notice {
+  margin: 0 0 var(--bs-space-5);
+  padding: var(--bs-space-3) var(--bs-space-4);
+  border-inline-start: 4px solid var(--bs-warning);
+  background: var(--bs-surface);
+  color: var(--bs-text);
+  font-size: var(--bs-text-sm);
+}
+
+.notice--off {
+  border-inline-start-color: var(--bs-danger);
+  color: var(--bs-danger);
+}
+
+.layout {
+  display: grid;
+  gap: var(--bs-space-5);
+  align-items: start;
+  grid-template-columns: 1fr;
+
+  @include m.from(t.$bs-bp-lg) {
+    grid-template-columns: minmax(0, 1fr) 20rem;
+  }
+}
+
+.column {
+  display: grid;
+  gap: var(--bs-space-5);
+}
+
+// --- What was bought -------------------------------------------------------
+
+.lines {
+  display: grid;
+  gap: var(--bs-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.line {
+  display: grid;
+  gap: var(--bs-space-3);
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+.line__cover {
+  display: block;
+  width: 56px;
+  height: 80px;
+  overflow: hidden;
+  border-radius: var(--bs-radius-sm);
+  background: var(--bs-surface-muted);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.line__cover-fallback {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--bs-text-muted);
+  font-family: var(--bs-font-serif);
+}
+
+.line__body {
+  min-width: 0;
+}
+
+.line__title {
+  margin: 0;
+  font-family: var(--bs-font-serif);
+  font-size: var(--bs-text-base);
+
+  a {
+    color: var(--bs-text);
+
+    &:hover {
+      color: var(--bs-primary);
+      text-decoration: none;
+    }
+  }
+}
+
+.line__author {
+  margin: 0;
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-sm);
+}
+
+.line__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bs-space-2);
+  margin: var(--bs-space-1) 0 0;
+}
+
+.line__condition {
+  padding: 0.1rem var(--bs-space-2);
+  border-radius: var(--bs-radius-pill);
+  background: var(--bs-accent-soft);
+  color: var(--bs-accent);
+  font-size: var(--bs-text-xs);
+}
+
+.line__code {
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-xs);
+  letter-spacing: 0.04em;
+}
+
+.line__price {
+  margin: 0;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+// --- Where it is going -----------------------------------------------------
+
+.address__recipient {
+  margin: 0;
+  font-weight: 600;
+}
+
+.address__line,
+.address__phone,
+.address__notes {
+  margin: 0;
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-sm);
+}
+
+// --- How far it has got ----------------------------------------------------
+
+.steps {
+  display: grid;
+  gap: var(--bs-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: grid;
+  gap: var(--bs-space-3);
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  color: var(--bs-text-muted);
+}
+
+.step__mark {
+  width: 0.85rem;
+  height: 0.85rem;
+  margin-block-start: 0.2rem;
+  border: 2px solid var(--bs-border-strong);
+  border-radius: var(--bs-radius-pill);
+  background: var(--bs-surface);
+}
+
+// A step that has actually happened is filled in; the rest are still to come.
+.step--done {
+  color: var(--bs-text);
+
+  .step__mark {
+    border-color: var(--bs-primary);
+    background: var(--bs-primary);
+  }
+}
+
+.step__body {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.step__label {
+  font-size: var(--bs-text-sm);
+  font-weight: 600;
+}
+
+.step__at {
+  font-size: var(--bs-text-xs);
+}
+
+// --- What it came to -------------------------------------------------------
+
+.summary {
+  display: grid;
+  gap: var(--bs-space-3);
+
+  @include m.from(t.$bs-bp-lg) {
+    position: sticky;
+    inset-block-start: var(--bs-space-5);
+  }
+}
+
+.summary__rows {
+  display: grid;
+  gap: var(--bs-space-2);
+  margin: 0;
+}
+
+.summary__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--bs-space-3);
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-sm);
+
+  dt,
+  dd {
+    margin: 0;
+  }
+}
+
+.summary__row--total {
+  padding-block-start: var(--bs-space-2);
+  border-block-start: 1px solid var(--bs-border);
+  color: var(--bs-text);
+  font-size: var(--bs-text-base);
+  font-weight: 700;
+}
+
+.summary__note {
+  margin: 0;
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-xs);
+}
+
+.summary__back {
+  color: var(--bs-primary);
+  font-size: var(--bs-text-sm);
+  text-align: center;
+}

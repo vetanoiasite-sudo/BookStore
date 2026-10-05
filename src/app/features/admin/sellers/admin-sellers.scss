@@ -1,0 +1,109 @@
+@use 'mixins' as m;
+@use 'tokens' as t;
+
+.skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bs-space-3);
+}
+
+.list {
+  display: grid;
+  gap: var(--bs-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: grid;
+  gap: var(--bs-space-3);
+}
+
+// A suspended seller stays in the list, quieter rather than hidden: they are still
+// on the platform and their books are still on sale.
+.card--off {
+  border-color: color-mix(in srgb, var(--bs-danger) 30%, var(--bs-border));
+}
+
+.card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--bs-space-3);
+}
+
+.card__name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bs-space-2);
+  margin: 0;
+  font-size: var(--bs-text-base);
+}
+
+.card__meta {
+  margin: var(--bs-space-1) 0 0;
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-xs);
+}
+
+.card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bs-space-2);
+}
+
+.card__suspend:hover:not(:disabled) {
+  border-color: var(--bs-danger);
+  color: var(--bs-danger);
+}
+
+.badge {
+  padding: 0.1rem var(--bs-space-2);
+  border-radius: var(--bs-radius-pill);
+  font-size: var(--bs-text-xs);
+  font-weight: 600;
+}
+
+.badge--ok {
+  background: var(--bs-primary-soft);
+  color: var(--bs-primary);
+}
+
+.badge--off {
+  background: color-mix(in srgb, var(--bs-danger) 12%, var(--bs-surface));
+  color: var(--bs-danger);
+}
+
+.reason {
+  margin: 0;
+  padding: var(--bs-space-2) var(--bs-space-3);
+  border-inline-start: 3px solid var(--bs-danger);
+  color: var(--bs-danger);
+  font-size: var(--bs-text-sm);
+}
+
+.numbers {
+  display: grid;
+  gap: var(--bs-space-3);
+  margin: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  @include m.from(t.$bs-bp-md) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  dt {
+    margin: 0;
+    color: var(--bs-text-muted);
+    font-size: var(--bs-text-xs);
+  }
+
+  dd {
+    margin: 0;
+    font-size: var(--bs-text-lg);
+    font-weight: 700;
+  }
+}

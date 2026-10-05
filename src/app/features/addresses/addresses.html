@@ -1,0 +1,115 @@
+<section class="addresses">
+  <div class="bs-container">
+    <header class="bs-page-header">
+      <div>
+        <h1>{{ 'address.title' | t }}</h1>
+        <p>{{ 'address.lead' | t }}</p>
+      </div>
+
+      @if (!formOpen()) {
+        <div class="bs-page-header__actions">
+          <button type="button" class="bs-button" (click)="add()">{{ 'address.add' | t }}</button>
+        </div>
+      }
+    </header>
+
+    @if (formOpen()) {
+      <section class="bs-card form-card">
+        <h2 class="bs-card__title">
+          {{ (editing() ? 'address.editTitle' : 'address.addTitle') | t }}
+        </h2>
+
+        <address-form
+          [address]="editing()"
+          [saving]="saving()"
+          (save)="save($event)"
+          (cancelled)="closeForm()"
+        />
+      </section>
+    }
+
+    @switch (state()) {
+      @case ('loading') {
+        <div class="list">
+          @for (placeholder of placeholders; track placeholder) {
+            <div class="bs-card" aria-hidden="true">
+              <ui-skeleton width="30%" height="1.1rem" />
+              <ui-skeleton width="70%" height="0.9rem" />
+              <ui-skeleton width="45%" height="0.9rem" />
+            </div>
+          }
+        </div>
+      }
+
+      @case ('error') {
+        <ui-error-state title="address.error.title" text="address.error.text" (retry)="load()" />
+      }
+
+      @default {
+        @if (items().length === 0) {
+          @if (!formOpen()) {
+            <ui-empty-state
+              title="address.empty.title"
+              text="address.empty.text"
+              actionLabel="address.add"
+              (action)="add()"
+            />
+          }
+        } @else {
+          <ul class="list">
+            @for (address of items(); track address.id) {
+              <li class="bs-card card">
+                <div class="card__head">
+                  <h2 class="card__label">{{ address.label }}</h2>
+
+                  @if (address.isDefault) {
+                    <span class="card__default">{{ 'address.default' | t }}</span>
+                  }
+                </div>
+
+                <p class="card__recipient">{{ address.recipientName }}</p>
+                <p class="card__line">{{ address.formatted }}</p>
+                <p class="card__phone">{{ address.phoneNumber }}</p>
+
+                @if (address.notes) {
+                  <p class="card__notes">{{ address.notes }}</p>
+                }
+
+                <div class="card__actions">
+                  <button
+                    type="button"
+                    class="bs-button bs-button--ghost"
+                    [disabled]="busy() === address.id"
+                    (click)="edit(address)"
+                  >
+                    {{ 'common.edit' | t }}
+                  </button>
+
+                  @if (!address.isDefault) {
+                    <button
+                      type="button"
+                      class="bs-button bs-button--ghost"
+                      [disabled]="busy() === address.id"
+                      (click)="makeDefault(address)"
+                    >
+                      {{ 'address.makeDefault' | t }}
+                    </button>
+                  }
+
+                  <button
+                    type="button"
+                    class="bs-button bs-button--ghost card__remove"
+                    [disabled]="busy() === address.id"
+                    (click)="remove(address)"
+                  >
+                    {{ 'common.delete' | t }}
+                  </button>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      }
+    }
+  </div>
+</section>

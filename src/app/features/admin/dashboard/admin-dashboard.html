@@ -1,0 +1,201 @@
+<header class="bs-page-header">
+  <div>
+    <h1>{{ 'admin.dashboard.title' | t }}</h1>
+    <p>{{ 'admin.dashboard.lead' | t }}</p>
+  </div>
+</header>
+
+@switch (state()) {
+  @case ('loading') {
+    <div class="stats" aria-hidden="true">
+      @for (placeholder of placeholders; track placeholder) {
+        <div class="bs-card">
+          <ui-skeleton width="40%" height="1.6rem" />
+          <ui-skeleton width="70%" height="0.8rem" />
+        </div>
+      }
+    </div>
+  }
+
+  @case ('error') {
+    <ui-error-state
+      title="admin.dashboard.error.title"
+      text="admin.dashboard.error.text"
+      (retry)="load()"
+    />
+  }
+
+  @default {
+    @if (data(); as board) {
+      <!-- What somebody has to do next -->
+      <section class="section">
+        <h2 class="section__title">{{ 'admin.dashboard.work' | t }}</h2>
+
+        <div class="stats">
+          <ui-stat-card
+            [value]="board.work.awaitingReview"
+            label="admin.dashboard.awaitingReview"
+            link="/admin/books"
+          />
+          <ui-stat-card
+            [value]="board.work.awaitingDelivery"
+            label="admin.dashboard.awaitingDelivery"
+            link="/admin/books/all"
+            [queryParams]="{ status: 'waitingForDelivery' }"
+          />
+          <ui-stat-card
+            [value]="board.work.awaitingShelf"
+            label="admin.dashboard.awaitingShelf"
+            link="/admin/books/all"
+            [queryParams]="{ status: 'received' }"
+          />
+          <ui-stat-card
+            [value]="board.work.awaitingPayment"
+            label="admin.dashboard.awaitingPayment"
+            link="/admin/orders"
+            [queryParams]="{ status: 'pendingPayment' }"
+          />
+          <ui-stat-card
+            [value]="board.work.readyToProcess"
+            label="admin.dashboard.readyToProcess"
+            link="/admin/orders"
+            [queryParams]="{ status: 'paid' }"
+          />
+        </div>
+      </section>
+
+      <!-- What the platform holds -->
+      <section class="section">
+        <h2 class="section__title">{{ 'admin.dashboard.catalogue' | t }}</h2>
+
+        <div class="stats">
+          <ui-stat-card [value]="board.catalogue.onSale" label="admin.dashboard.onSale" />
+          <ui-stat-card [value]="board.catalogue.reserved" label="admin.dashboard.reserved" />
+          <ui-stat-card [value]="board.catalogue.sold" label="admin.dashboard.sold" />
+          <ui-stat-card
+            [value]="board.catalogue.inStock"
+            label="admin.dashboard.inStock"
+            link="/admin/inventory"
+          />
+          <ui-stat-card
+            [value]="board.catalogue.locations"
+            label="admin.dashboard.locations"
+            link="/admin/inventory"
+          />
+        </div>
+      </section>
+
+      <!-- What has been ordered -->
+      <section class="section">
+        <h2 class="section__title">{{ 'admin.dashboard.commerce' | t }}</h2>
+
+        <div class="stats">
+          <ui-stat-card [value]="board.commerce.ordersToday" label="admin.dashboard.ordersToday" />
+          <ui-stat-card [value]="board.commerce.ordersThisWeek" label="admin.dashboard.ordersWeek" />
+          <ui-stat-card
+            [value]="board.commerce.ordersTotal"
+            label="admin.dashboard.ordersTotal"
+            link="/admin/orders"
+          />
+          <ui-stat-card
+            [value]="board.commerce.grossValue | price: board.currency"
+            label="admin.dashboard.gross"
+          />
+          <ui-stat-card
+            [value]="board.commerce.platformFees | price: board.currency"
+            label="admin.dashboard.fees"
+          />
+        </div>
+
+        <div class="charts">
+          <ui-mini-chart [points]="orderPoints()" label="admin.dashboard.ordersChart" />
+          <ui-mini-chart [points]="listingPoints()" label="admin.dashboard.listingsChart" />
+        </div>
+      </section>
+
+      <div class="columns">
+        <!-- The queue, oldest first: nobody is left at the bottom of it -->
+        <section class="bs-card">
+          <h2 class="bs-card__title">{{ 'admin.dashboard.queue' | t }}</h2>
+
+          @if (board.reviewQueue.length === 0) {
+            <p class="empty">{{ 'admin.dashboard.queueEmpty' | t }}</p>
+          } @else {
+            <ul class="list">
+              @for (entry of board.reviewQueue; track entry.publicId) {
+                <li class="list__row">
+                  <a class="list__main" [routerLink]="['/admin/books', entry.publicId]">
+                    <span class="list__title">{{ entry.title }}</span>
+                    <span class="list__meta">
+                      {{ entry.publicId }} · {{ entry.sellerPublicId }}
+                    </span>
+                  </a>
+
+                  <span class="list__side">
+                    <ui-status-badge [status]="entry.status" />
+                    <span class="list__date">{{ entry.since | date: 'short' }}</span>
+                  </span>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+
+        <!-- The most recent orders, whatever state they are in -->
+        <section class="bs-card">
+          <h2 class="bs-card__title">{{ 'admin.dashboard.recentOrders' | t }}</h2>
+
+          @if (board.recentOrders.length === 0) {
+            <p class="empty">{{ 'admin.dashboard.noOrders' | t }}</p>
+          } @else {
+            <ul class="list">
+              @for (order of board.recentOrders; track order.orderNumber) {
+                <li class="list__row">
+                  <a class="list__main" [routerLink]="['/admin/orders', order.orderNumber]">
+                    <span class="list__title">{{ order.orderNumber }}</span>
+                    <span class="list__meta">
+                      {{ order.buyerName }} · {{ order.placedAt | date: 'short' }}
+                    </span>
+                  </a>
+
+                  <span class="list__side">
+                    <span class="list__status">{{ order.status | orderStatusLabel }}</span>
+                    <span class="list__total">{{ order.total | price: order.currency }}</span>
+                  </span>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      </div>
+
+      <!-- The people on the platform -->
+      <section class="section">
+        <h2 class="section__title">{{ 'admin.dashboard.people' | t }}</h2>
+
+        <div class="stats">
+          <ui-stat-card
+            [value]="board.people.users"
+            label="admin.dashboard.users"
+            link="/admin/users"
+          />
+          <ui-stat-card
+            [value]="board.people.sellers"
+            label="admin.dashboard.sellers"
+            link="/admin/sellers"
+          />
+          <ui-stat-card
+            [value]="board.people.verifiedSellers"
+            label="admin.dashboard.verifiedSellers"
+          />
+          <ui-stat-card
+            [value]="board.people.suspendedSellers"
+            label="admin.dashboard.suspendedSellers"
+            link="/admin/sellers"
+            [queryParams]="{ suspended: 'true' }"
+          />
+        </div>
+      </section>
+    }
+  }
+}

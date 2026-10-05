@@ -1,0 +1,56 @@
+<section class="favorites">
+  <div class="bs-container">
+    <header class="favorites__header">
+      <div>
+        <h1 class="favorites__title">{{ 'favorites.title' | t }}</h1>
+        <p class="favorites__lead">{{ 'favorites.lead' | t }}</p>
+      </div>
+
+      @if (result(); as page) {
+        @if (page.totalCount > 0) {
+          <p class="favorites__count">{{ 'favorites.count' | t: { count: page.totalCount } }}</p>
+        }
+      }
+    </header>
+
+    @switch (state()) {
+      @case ('loading') {
+        <div class="grid">
+          @for (placeholder of placeholders; track placeholder) {
+            <book-card-skeleton />
+          }
+        </div>
+      }
+
+      @case ('error') {
+        <ui-error-state title="favorites.error.title" text="books.error.text" (retry)="load()" />
+      }
+
+      @default {
+        @if (isEmpty()) {
+          <ui-empty-state title="favorites.empty.title" text="favorites.empty.text" />
+
+          <p class="favorites__browse">
+            <a routerLink="/books">{{ 'favorites.empty.action' | t }}</a>
+          </p>
+        } @else if (result(); as page) {
+          <div class="grid">
+            @for (entry of page.items; track entry.book.publicId) {
+              <book-card
+                [book]="entry.book"
+                [unavailable]="!entry.isAvailable"
+                (unsaved)="onRemoved()"
+              />
+            }
+          </div>
+
+          <ui-pagination
+            [page]="page.page"
+            [totalPages]="page.totalPages"
+            (pageChange)="goToPage($event)"
+          />
+        }
+      }
+    }
+  </div>
+</section>

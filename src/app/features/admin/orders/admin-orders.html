@@ -1,0 +1,114 @@
+<header class="bs-page-header">
+  <div>
+    <h1>{{ 'admin.orders.title' | t }}</h1>
+    <p>
+      @if (state() === 'ready' && result(); as page) {
+        {{ 'admin.orders.count' | t: { count: page.totalCount } }}
+      } @else {
+        {{ 'admin.orders.lead' | t }}
+      }
+    </p>
+  </div>
+</header>
+
+<div class="bs-toolbar">
+  <div class="bs-chips" role="group" [attr.aria-label]="'admin.orders.filter' | t">
+    @for (filter of filters; track filter.value) {
+      <button
+        type="button"
+        class="bs-chip"
+        [class.bs-chip--active]="status() === filter.value"
+        [attr.aria-pressed]="status() === filter.value"
+        (click)="changeFilter(filter.value)"
+      >
+        {{ filter.labelKey | t }}
+      </button>
+    }
+  </div>
+
+  <form class="bs-search" (submit)="search($event)" role="search">
+    <label class="bs-visually-hidden" for="order-search">{{ 'admin.orders.search' | t }}</label>
+    <input
+      id="order-search"
+      name="term"
+      class="bs-input"
+      type="search"
+      [value]="term()"
+      [attr.placeholder]="'admin.orders.search' | t"
+    />
+    <button class="bs-button bs-button--ghost" type="submit">{{ 'search.submit' | t }}</button>
+  </form>
+</div>
+
+@switch (state()) {
+  @case ('loading') {
+    <div class="skeletons" aria-hidden="true">
+      @for (placeholder of placeholders; track placeholder) {
+        <ui-skeleton height="2.5rem" />
+      }
+    </div>
+  }
+
+  @case ('error') {
+    <ui-error-state title="orders.error.title" text="orders.error.text" (retry)="load()" />
+  }
+
+  @default {
+    @if (isEmpty()) {
+      <ui-empty-state title="admin.orders.empty.title" text="admin.orders.empty.text" />
+    } @else if (result(); as page) {
+      <div class="bs-table-scroll">
+        <table class="bs-table">
+          <thead>
+            <tr>
+              <th scope="col">{{ 'admin.orders.column.number' | t }}</th>
+              <th scope="col">{{ 'admin.orders.column.buyer' | t }}</th>
+              <th scope="col">{{ 'admin.orders.column.placed' | t }}</th>
+              <th scope="col">{{ 'admin.orders.column.copies' | t }}</th>
+              <th scope="col">{{ 'admin.orders.column.total' | t }}</th>
+              <th scope="col">{{ 'admin.orders.column.fee' | t }}</th>
+              <th scope="col">{{ 'admin.orders.column.status' | t }}</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (order of page.items; track order.orderNumber) {
+              <tr>
+                <td>
+                  <a class="number" [routerLink]="['/admin/orders', order.orderNumber]">
+                    {{ order.orderNumber }}
+                  </a>
+                </td>
+                <td>
+                  <span class="buyer">{{ order.buyerName }}</span>
+                  <span class="code">{{ order.buyerPublicId }}</span>
+                </td>
+                <td class="nowrap">{{ order.placedAt | date: 'short' }}</td>
+                <td>{{ order.itemCount }}</td>
+                <td class="nowrap">{{ order.total | price: order.currency }}</td>
+                <td class="nowrap">{{ order.platformFee | price: order.currency }}</td>
+                <td>
+                  <span class="status">{{ order.status | orderStatusLabel }}</span>
+
+                  <!-- An unpaid order is holding copies, so when it lets go matters -->
+                  @if (order.reservationExpiresAt) {
+                    <span class="code">
+                      {{ 'admin.orders.holdsUntil' | t }}
+                      {{ order.reservationExpiresAt | date: 'short' }}
+                    </span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <ui-pagination
+        [page]="page.page"
+        [totalPages]="page.totalPages"
+        (pageChange)="goToPage($event)"
+      />
+    }
+  }
+}

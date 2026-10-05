@@ -1,0 +1,118 @@
+@switch (state()) {
+  @case ('loading') {
+    <div class="skeletons">
+      @for (placeholder of placeholders; track placeholder) {
+        <ui-skeleton height="5.5rem" />
+      }
+    </div>
+  }
+
+  @case ('error') {
+    <ui-error-state
+      title="seller.dashboard.error.title"
+      text="seller.dashboard.error.text"
+      (retry)="load()"
+    />
+  }
+
+  @default {
+    @if (data(); as dashboard) {
+      <header class="bs-page-header">
+        <div>
+          <h1>{{ 'seller.dashboard.greeting' | t: { name: dashboard.displayName } }}</h1>
+          <p>
+            {{ 'seller.dashboard.code' | t: { code: dashboard.sellerPublicId } }}
+            @if (dashboard.isVerified) {
+              &middot; {{ 'seller.dashboard.verified' | t }}
+            }
+          </p>
+        </div>
+
+        <div class="bs-page-header__actions">
+          <a class="bs-button" routerLink="/seller/books/new">{{ 'seller.addBook' | t }}</a>
+          <a class="bs-button bs-button--ghost" routerLink="/seller/books">
+            {{ 'seller.nav.books' | t }}
+          </a>
+        </div>
+      </header>
+
+      @if (dashboard.isSuspended) {
+        <p class="notice notice--danger" role="alert">{{ 'seller.suspended' | t }}</p>
+      } @else if (needsAttention() > 0) {
+        <p class="notice">
+          {{ 'seller.dashboard.attention' | t: { count: needsAttention() } }}
+        </p>
+      }
+
+      <section class="stats" [attr.aria-label]="'seller.dashboard.counts' | t">
+        <ui-stat-card
+          [value]="dashboard.drafts"
+          label="bookStatus.draft"
+          link="/seller/books"
+          [queryParams]="{ status: 'draft' }"
+        />
+        <ui-stat-card
+          [value]="dashboard.awaitingReview"
+          label="bookStatus.pendingReview"
+          link="/seller/books"
+          [queryParams]="{ status: 'pendingReview' }"
+        />
+        <ui-stat-card
+          [value]="dashboard.rejected"
+          label="bookStatus.rejected"
+          link="/seller/books"
+          [queryParams]="{ status: 'rejected' }"
+        />
+        <ui-stat-card
+          [value]="dashboard.awaitingDelivery"
+          label="bookStatus.waitingForDelivery"
+          link="/seller/books"
+          [queryParams]="{ status: 'waitingForDelivery' }"
+        />
+        <ui-stat-card
+          [value]="dashboard.onSale"
+          label="bookStatus.available"
+          link="/seller/books"
+          [queryParams]="{ status: 'available' }"
+        />
+        <ui-stat-card
+          [value]="dashboard.sold"
+          label="bookStatus.sold"
+          link="/seller/books"
+          [queryParams]="{ status: 'sold' }"
+        />
+      </section>
+
+      <section class="summary">
+        <ui-stat-card [value]="dashboard.totalListings" label="seller.dashboard.totalListings" />
+        <ui-stat-card [value]="dashboard.totalViews" label="seller.dashboard.totalViews" />
+        <ui-stat-card [value]="dashboard.totalSales" label="seller.dashboard.totalSales" />
+        <ui-stat-card
+          [value]="dashboard.ratingCount > 0 ? (dashboard.ratingAverage ?? 0) : '—'"
+          label="seller.dashboard.rating"
+        />
+      </section>
+
+      <section class="bs-card recent">
+        <h2 class="bs-card__title">{{ 'seller.dashboard.recent' | t }}</h2>
+
+        @if (isNew()) {
+          <p class="recent__empty">{{ 'seller.dashboard.empty' | t }}</p>
+          <a class="bs-button" routerLink="/seller/books/new">{{ 'seller.addFirstBook' | t }}</a>
+        } @else {
+          <ul class="recent__list">
+            @for (book of dashboard.recent; track book.publicId) {
+              <li class="recent__item">
+                <a class="recent__title" [routerLink]="['/seller/books', book.publicId]">
+                  {{ book.title }}
+                </a>
+                <span class="recent__price">{{ book.price | price: book.currency }}</span>
+                <ui-status-badge [status]="book.status" />
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+  }
+}

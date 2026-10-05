@@ -1,0 +1,51 @@
+<figure class="chart">
+  <figcaption class="chart__caption">
+    <span class="chart__label">{{ label() | t }}</span>
+    <span class="chart__total">{{ total() }}</span>
+  </figcaption>
+
+  @if (bars().length > 0) {
+    <!--
+      Presentational: the same numbers are in the table below, which is what a
+      screen reader reads rather than a shape it cannot describe.
+    -->
+    <svg
+      class="chart__svg"
+      [attr.viewBox]="viewBox"
+      preserveAspectRatio="none"
+      role="presentation"
+      aria-hidden="true"
+    >
+      @for (bar of bars(); track bar.label) {
+        <rect
+          class="chart__bar"
+          [attr.x]="bar.x"
+          [attr.y]="bar.y"
+          [attr.width]="barWidth()"
+          [attr.height]="bar.height"
+          rx="0.6"
+        >
+          <title>{{ bar.title }}</title>
+        </rect>
+      }
+    </svg>
+
+    <ol class="chart__axis" aria-hidden="true">
+      @for (bar of bars(); track bar.label) {
+        <li>{{ bar.label }}</li>
+      }
+    </ol>
+
+    <table class="bs-visually-hidden">
+      <caption>{{ label() | t }}</caption>
+      <tbody>
+        @for (point of points(); track point.label) {
+          <tr>
+            <th scope="row">{{ point.title }}</th>
+            <td>{{ point.value }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</figure>

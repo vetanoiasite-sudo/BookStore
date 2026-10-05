@@ -1,0 +1,56 @@
+.skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bs-space-2);
+}
+
+// A closed account is still listed, greyed rather than hidden: it is part of the
+// record, and hiding it would only make somebody wonder where it went.
+.closed {
+  opacity: 0.65;
+}
+
+.person {
+  display: block;
+  font-weight: 600;
+}
+
+.code {
+  display: block;
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-xs);
+}
+
+.roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bs-space-1);
+}
+
+.role {
+  padding: 0.1rem var(--bs-space-2);
+  border-radius: var(--bs-radius-pill);
+  background: var(--bs-surface-muted);
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-xs);
+}
+
+.flag {
+  display: inline-block;
+  margin-block-start: var(--bs-space-1);
+  padding: 0.1rem var(--bs-space-2);
+  border-radius: var(--bs-radius-pill);
+  background: color-mix(in srgb, var(--bs-warning) 15%, var(--bs-surface));
+  color: var(--bs-warning);
+  font-size: var(--bs-text-xs);
+  font-weight: 600;
+}
+
+.flag--off {
+  background: color-mix(in srgb, var(--bs-danger) 12%, var(--bs-surface));
+  color: var(--bs-danger);
+}
+
+.nowrap {
+  white-space: nowrap;
+}

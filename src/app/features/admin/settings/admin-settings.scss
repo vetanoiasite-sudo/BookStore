@@ -1,0 +1,27 @@
+.skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bs-space-2);
+}
+
+.key {
+  display: block;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.description {
+  display: block;
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-xs);
+}
+
+// The value is what somebody came here to read, so it is the loudest thing in the row.
+.value {
+  display: inline-block;
+  padding: 0.1rem var(--bs-space-3);
+  border-radius: var(--bs-radius-sm);
+  background: var(--bs-surface-muted);
+  font-weight: 700;
+  white-space: nowrap;
+}

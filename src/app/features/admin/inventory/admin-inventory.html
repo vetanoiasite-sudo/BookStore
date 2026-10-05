@@ -1,0 +1,265 @@
+<header class="bs-page-header">
+  <div>
+    <h1>{{ 'admin.inventory.title' | t }}</h1>
+    <p>
+      @if (state() === 'ready' && result(); as page) {
+        {{ 'admin.inventory.count' | t: { count: page.totalCount } }}
+      } @else {
+        {{ 'admin.inventory.lead' | t }}
+      }
+    </p>
+  </div>
+
+  <div class="bs-page-header__actions">
+    <button type="button" class="bs-button bs-button--ghost" (click)="toggleLocations()">
+      {{ (showLocations() ? 'admin.inventory.hideShelves' : 'admin.inventory.shelves') | t }}
+    </button>
+  </div>
+</header>
+
+<!-- The shelves themselves, folded away until somebody asks for them -->
+@if (showLocations()) {
+  <section class="bs-card shelves">
+    <h2 class="bs-card__title">{{ 'admin.inventory.shelves' | t }}</h2>
+
+    <form class="shelf-form" [formGroup]="locationForm" (ngSubmit)="saveLocation()">
+      <div class="shelf-form__fields">
+        <div class="bs-field">
+          <label class="bs-label" for="shelf-warehouse">{{ 'admin.inventory.warehouse' | t }}</label>
+          <input id="shelf-warehouse" class="bs-input" formControlName="warehouse" />
+        </div>
+        <div class="bs-field">
+          <label class="bs-label" for="shelf-zone">{{ 'admin.inventory.zone' | t }}</label>
+          <input id="shelf-zone" class="bs-input" formControlName="zone" />
+        </div>
+        <div class="bs-field">
+          <label class="bs-label" for="shelf-rack">{{ 'admin.inventory.rack' | t }}</label>
+          <input id="shelf-rack" class="bs-input" formControlName="rack" />
+        </div>
+        <div class="bs-field">
+          <label class="bs-label" for="shelf-shelf">{{ 'admin.inventory.shelf' | t }}</label>
+          <input id="shelf-shelf" class="bs-input" formControlName="shelf" />
+        </div>
+        <div class="bs-field">
+          <label class="bs-label" for="shelf-box">{{ 'admin.inventory.box' | t }}</label>
+          <input id="shelf-box" class="bs-input" formControlName="box" />
+        </div>
+        <div class="bs-field">
+          <label class="bs-label" for="shelf-capacity">{{ 'admin.inventory.capacity' | t }}</label>
+          <input
+            id="shelf-capacity"
+            class="bs-input"
+            type="number"
+            min="1"
+            formControlName="capacity"
+          />
+        </div>
+      </div>
+
+      <div class="shelf-form__actions">
+        <button type="submit" class="bs-button" [disabled]="savingLocation()">
+          {{ (editingLocation() ? 'common.save' : 'admin.inventory.addShelf') | t }}
+        </button>
+
+        @if (editingLocation()) {
+          <button
+            type="button"
+            class="bs-button bs-button--ghost"
+            (click)="editLocation(null)"
+          >
+            {{ 'common.cancel' | t }}
+          </button>
+        }
+      </div>
+    </form>
+
+    <div class="bs-table-scroll">
+      <table class="bs-table">
+        <thead>
+          <tr>
+            <th scope="col">{{ 'admin.inventory.column.code' | t }}</th>
+            <th scope="col">{{ 'admin.inventory.column.place' | t }}</th>
+            <th scope="col">{{ 'admin.inventory.column.holds' | t }}</th>
+            <th scope="col">{{ 'common.actions' | t }}</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (location of locations(); track location.id) {
+            <tr [class.closed]="!location.isActive">
+              <td><span class="location">{{ location.code }}</span></td>
+              <td>{{ location.description }}</td>
+              <td>
+                {{ location.itemCount }}
+                @if (location.capacity) {
+                  <span class="code">/ {{ location.capacity }}</span>
+                }
+              </td>
+              <td class="actions">
+                <button
+                  type="button"
+                  class="bs-button bs-button--ghost"
+                  (click)="editLocation(location)"
+                >
+                  {{ 'common.edit' | t }}
+                </button>
+                <button
+                  type="button"
+                  class="bs-button bs-button--ghost"
+                  [disabled]="busy() === location.id"
+                  (click)="toggleLocationActive(location)"
+                >
+                  {{ (location.isActive ? 'admin.inventory.close' : 'admin.inventory.open') | t }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+}
+
+<form class="bs-toolbar" (submit)="search($event)" role="search">
+  <p class="bs-muted">{{ 'admin.inventory.searchHint' | t }}</p>
+
+  <div class="bs-search">
+    <label class="bs-visually-hidden" for="stock-search">{{ 'admin.inventory.search' | t }}</label>
+    <input
+      id="stock-search"
+      name="term"
+      class="bs-input"
+      type="search"
+      autocomplete="off"
+      [value]="term()"
+      [attr.placeholder]="'admin.inventory.search' | t"
+    />
+    <button class="bs-button bs-button--ghost" type="submit">{{ 'search.submit' | t }}</button>
+  </div>
+</form>
+
+@switch (state()) {
+  @case ('loading') {
+    <div class="skeletons" aria-hidden="true">
+      @for (placeholder of placeholders; track placeholder) {
+        <ui-skeleton height="3rem" />
+      }
+    </div>
+  }
+
+  @case ('error') {
+    <ui-error-state
+      title="admin.inventory.error.title"
+      text="admin.inventory.error.text"
+      (retry)="load()"
+    />
+  }
+
+  @default {
+    @if (isEmpty()) {
+      <ui-empty-state title="admin.inventory.empty.title" text="admin.inventory.empty.text" />
+    } @else if (result(); as page) {
+      <div class="bs-table-scroll">
+        <table class="bs-table">
+          <thead>
+            <tr>
+              <th scope="col">{{ 'admin.inventory.column.book' | t }}</th>
+              <th scope="col">{{ 'admin.inventory.column.status' | t }}</th>
+              <th scope="col">{{ 'admin.inventory.column.where' | t }}</th>
+              <th scope="col">{{ 'admin.inventory.column.received' | t }}</th>
+              <th scope="col">{{ 'common.actions' | t }}</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (item of page.items; track item.itemId) {
+              <tr>
+                <td>
+                  <a class="book" [routerLink]="['/admin/books', item.bookPublicId]">
+                    {{ item.title }}
+                  </a>
+                  <span class="code">
+                    {{ item.bookPublicId }}
+                    @if (item.isbn) {
+                      · {{ item.isbn }}
+                    }
+                  </span>
+                </td>
+
+                <td><ui-status-badge [status]="item.bookStatus" /></td>
+
+                <td>
+                  <span class="location">{{ item.locationCode }}</span>
+
+                  @if (item.dispatchedAt) {
+                    <span class="code">{{ 'admin.inventory.dispatched' | t }}</span>
+                  } @else {
+                    <label class="bs-visually-hidden" [attr.for]="'move-' + item.itemId">
+                      {{ 'admin.inventory.moveTo' | t }}
+                    </label>
+                    <select
+                      class="bs-select move"
+                      [id]="'move-' + item.itemId"
+                      [disabled]="busy() === item.itemId"
+                      (change)="move(item, $event)"
+                    >
+                      <option value="">{{ 'admin.inventory.moveTo' | t }}</option>
+                      @for (shelf of openShelves(); track shelf.id) {
+                        <option [value]="shelf.id" [disabled]="shelf.id === item.locationId">
+                          {{ shelf.code }}
+                        </option>
+                      }
+                    </select>
+                  }
+                </td>
+
+                <td class="nowrap">{{ item.receivedAt | date: 'shortDate' }}</td>
+
+                <td>
+                  <button
+                    type="button"
+                    class="bs-button bs-button--ghost"
+                    (click)="toggleHistory(item)"
+                  >
+                    {{ 'admin.inventory.history' | t }}
+                  </button>
+                </td>
+              </tr>
+
+              @if (openHistory() === item.itemId) {
+                <tr class="history">
+                  <td colspan="5">
+                    @if (history().length === 0) {
+                      <p class="bs-muted">{{ 'admin.inventory.noHistory' | t }}</p>
+                    } @else {
+                      <ol class="moves">
+                        @for (move of history(); track move.at) {
+                          <li>
+                            <span class="moves__where">
+                              {{ move.fromCode ?? ('admin.inventory.fromOutside' | t) }}
+                              →
+                              {{ move.toCode ?? ('admin.inventory.toOutside' | t) }}
+                            </span>
+                            <span class="code">
+                              {{ move.at | date: 'short' }} · {{ move.actor }} · {{ move.reason }}
+                            </span>
+                          </li>
+                        }
+                      </ol>
+                    }
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <ui-pagination
+        [page]="page.page"
+        [totalPages]="page.totalPages"
+        (pageChange)="goToPage($event)"
+      />
+    }
+  }
+}

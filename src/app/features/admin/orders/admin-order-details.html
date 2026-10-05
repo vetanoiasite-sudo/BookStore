@@ -1,0 +1,197 @@
+@switch (state()) {
+  @case ('loading') {
+    <div class="bs-card" aria-hidden="true">
+      <ui-skeleton width="30%" height="1.4rem" />
+      <ui-skeleton width="60%" height="0.9rem" />
+      <ui-skeleton width="80%" height="0.9rem" />
+    </div>
+  }
+
+  @case ('missing') {
+    <div class="bs-card missing">
+      <h1>{{ 'orders.notFound.title' | t }}</h1>
+      <p class="bs-muted">{{ 'admin.orders.notFound.text' | t }}</p>
+      <a class="bs-button" routerLink="/admin/orders">{{ 'admin.orders.backToList' | t }}</a>
+    </div>
+  }
+
+  @case ('error') {
+    <ui-error-state title="orders.error.title" text="orders.error.text" (retry)="load()" />
+  }
+
+  @default {
+    @if (order(); as item) {
+      <header class="bs-page-header">
+        <div>
+          <h1>{{ item.orderNumber }}</h1>
+          <p>{{ item.placedAt | date: 'medium' }}</p>
+        </div>
+
+        <div class="bs-page-header__actions">
+          <span class="status">{{ item.status | orderStatusLabel }}</span>
+          <a class="bs-button bs-button--ghost" routerLink="/admin/orders">
+            {{ 'admin.orders.backToList' | t }}
+          </a>
+        </div>
+      </header>
+
+      @if (item.reservationExpiresAt) {
+        <p class="notice">
+          {{ 'admin.orders.holdsUntil' | t }}
+          <strong>{{ item.reservationExpiresAt | date: 'short' }}</strong>
+          — {{ 'admin.orders.holdNote' | t }}
+        </p>
+      }
+
+      @if (item.cancellationReason) {
+        <p class="notice notice--off">
+          {{ 'orders.cancelledOn' | t }}
+          <strong>{{ item.cancelledAt | date: 'short' }}</strong>
+          — {{ item.cancellationReason }}
+        </p>
+      }
+
+      <div class="layout">
+        <div class="column">
+          <!-- What to pick, and where it is -->
+          <section class="bs-card">
+            <h2 class="bs-card__title">{{ 'admin.orders.pickList' | t }}</h2>
+
+            <div class="bs-table-scroll">
+              <table class="bs-table">
+                <thead>
+                  <tr>
+                    <th scope="col">{{ 'admin.orders.column.book' | t }}</th>
+                    <th scope="col">{{ 'admin.orders.column.location' | t }}</th>
+                    <th scope="col">{{ 'admin.orders.column.seller' | t }}</th>
+                    <th scope="col">{{ 'admin.orders.column.price' | t }}</th>
+                    <th scope="col">{{ 'admin.orders.column.earnings' | t }}</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  @for (line of item.items; track line.bookPublicId) {
+                    <tr>
+                      <td>
+                        <a class="book" [routerLink]="['/admin/books', line.bookPublicId]">
+                          {{ line.title }}
+                        </a>
+                        <span class="code">
+                          {{ line.bookPublicId }} · {{ line.condition | conditionLabel }}
+                        </span>
+                        <ui-status-badge [status]="line.bookStatus" />
+                      </td>
+                      <td>
+                        @if (line.locationCode) {
+                          <span class="location">{{ line.locationCode }}</span>
+                        } @else {
+                          <span class="code">{{ 'admin.orders.dispatched' | t }}</span>
+                        }
+                      </td>
+                      <td class="code">{{ line.sellerPublicId }}</td>
+                      <td class="nowrap">{{ line.price | price: item.currency }}</td>
+                      <td class="nowrap">{{ line.sellerEarnings | price: item.currency }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- Who it goes to. This is the one screen that sees them -->
+          <section class="bs-card">
+            <h2 class="bs-card__title">{{ 'admin.orders.buyer' | t }}</h2>
+
+            <dl class="facts">
+              <div>
+                <dt>{{ 'admin.orders.buyerName' | t }}</dt>
+                <dd>{{ item.buyer.displayName }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'admin.orders.buyerCode' | t }}</dt>
+                <dd>{{ item.buyer.publicId }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'admin.orders.buyerEmail' | t }}</dt>
+                <dd>{{ item.buyer.email }}</dd>
+              </div>
+            </dl>
+
+            <h3 class="subtitle">{{ 'orders.shippingTo' | t }}</h3>
+            <p class="address">{{ item.shippingAddress.recipientName }}</p>
+            <p class="address address--muted">{{ item.shippingAddress.formatted }}</p>
+            <p class="address address--muted">{{ item.shippingAddress.phoneNumber }}</p>
+
+            @if (item.shippingAddress.notes) {
+              <p class="address address--muted">{{ item.shippingAddress.notes }}</p>
+            }
+          </section>
+        </div>
+
+        <!-- What it came to, and who gets what -->
+        <aside class="bs-card summary">
+          <h2 class="bs-card__title">{{ 'cart.summary.title' | t }}</h2>
+
+          <dl class="summary__rows">
+            <div class="summary__row">
+              <dt>{{ 'cart.summary.subtotal' | t }}</dt>
+              <dd>{{ item.subtotal | price: item.currency }}</dd>
+            </div>
+            <div class="summary__row">
+              <dt>{{ 'checkout.shipping' | t }}</dt>
+              <dd>{{ item.shippingCost | price: item.currency }}</dd>
+            </div>
+            <div class="summary__row summary__row--total">
+              <dt>{{ 'checkout.total' | t }}</dt>
+              <dd>{{ item.total | price: item.currency }}</dd>
+            </div>
+            <div class="summary__row">
+              <dt>{{ 'admin.orders.platformFee' | t }}</dt>
+              <dd>{{ item.platformFee | price: item.currency }}</dd>
+            </div>
+            <div class="summary__row">
+              <dt>{{ 'admin.orders.sellerEarnings' | t }}</dt>
+              <dd>{{ item.sellerEarnings | price: item.currency }}</dd>
+            </div>
+          </dl>
+
+          <h3 class="subtitle">{{ 'orders.progress' | t }}</h3>
+
+          <dl class="facts">
+            <div>
+              <dt>{{ 'orders.step.placed' | t }}</dt>
+              <dd>{{ item.placedAt | date: 'short' }}</dd>
+            </div>
+            @if (item.paidAt) {
+              <div>
+                <dt>{{ 'orders.step.paid' | t }}</dt>
+                <dd>{{ item.paidAt | date: 'short' }}</dd>
+              </div>
+            }
+            @if (item.shippedAt) {
+              <div>
+                <dt>{{ 'orders.step.shipped' | t }}</dt>
+                <dd>{{ item.shippedAt | date: 'short' }}</dd>
+              </div>
+            }
+            @if (item.deliveredAt) {
+              <div>
+                <dt>{{ 'orders.step.delivered' | t }}</dt>
+                <dd>{{ item.deliveredAt | date: 'short' }}</dd>
+              </div>
+            }
+            @if (item.completedAt) {
+              <div>
+                <dt>{{ 'orders.step.completed' | t }}</dt>
+                <dd>{{ item.completedAt | date: 'short' }}</dd>
+              </div>
+            }
+          </dl>
+
+          <!-- Fulfilment arrives with shipping; saying so beats an inert button -->
+          <p class="bs-muted">{{ 'admin.orders.fulfilmentSoon' | t }}</p>
+        </aside>
+      </div>
+    }
+  }
+}

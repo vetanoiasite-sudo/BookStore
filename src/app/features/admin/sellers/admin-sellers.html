@@ -1,0 +1,163 @@
+<header class="bs-page-header">
+  <div>
+    <h1>{{ 'admin.sellers.title' | t }}</h1>
+    <p>
+      @if (state() === 'ready' && result(); as page) {
+        {{ 'admin.sellers.count' | t: { count: page.totalCount } }}
+      } @else {
+        {{ 'admin.sellers.lead' | t }}
+      }
+    </p>
+  </div>
+</header>
+
+<div class="bs-toolbar">
+  <div class="bs-chips" role="group" [attr.aria-label]="'admin.sellers.filter.label' | t">
+    @for (entry of filters; track entry.key) {
+      <button
+        type="button"
+        class="bs-chip"
+        [class.bs-chip--active]="filter() === entry.key"
+        [attr.aria-pressed]="filter() === entry.key"
+        (click)="changeFilter(entry.key)"
+      >
+        {{ entry.labelKey | t }}
+      </button>
+    }
+  </div>
+
+  <form class="bs-search" (submit)="search($event)" role="search">
+    <label class="bs-visually-hidden" for="seller-search">{{ 'admin.sellers.search' | t }}</label>
+    <input
+      id="seller-search"
+      name="term"
+      class="bs-input"
+      type="search"
+      [value]="term()"
+      [attr.placeholder]="'admin.sellers.search' | t"
+    />
+    <button class="bs-button bs-button--ghost" type="submit">{{ 'search.submit' | t }}</button>
+  </form>
+</div>
+
+@switch (state()) {
+  @case ('loading') {
+    <div class="skeletons" aria-hidden="true">
+      @for (placeholder of placeholders; track placeholder) {
+        <ui-skeleton height="4rem" />
+      }
+    </div>
+  }
+
+  @case ('error') {
+    <ui-error-state
+      title="admin.sellers.error.title"
+      text="admin.sellers.error.text"
+      (retry)="load()"
+    />
+  }
+
+  @default {
+    @if (isEmpty()) {
+      <ui-empty-state title="admin.sellers.empty.title" text="admin.sellers.empty.text" />
+    } @else if (result(); as page) {
+      <ul class="list">
+        @for (seller of page.items; track seller.id) {
+          <li class="bs-card card" [class.card--off]="seller.isSuspended">
+            <div class="card__head">
+              <div>
+                <h2 class="card__name">
+                  {{ seller.displayName }}
+
+                  @if (seller.isVerified) {
+                    <span class="badge badge--ok">{{ 'admin.sellers.verified' | t }}</span>
+                  }
+                  @if (seller.isSuspended) {
+                    <span class="badge badge--off">{{ 'admin.sellers.suspended' | t }}</span>
+                  }
+                </h2>
+
+                <p class="card__meta">{{ seller.publicId }} · {{ seller.email }}</p>
+                <p class="card__meta">
+                  {{ 'admin.sellers.joined' | t }} {{ seller.joinedAt | date: 'shortDate' }}
+                </p>
+              </div>
+
+              @if (auth.isAdmin()) {
+                <div class="card__actions">
+                  @if (!seller.isVerified) {
+                    <button
+                      type="button"
+                      class="bs-button bs-button--ghost"
+                      [disabled]="busy() === seller.id"
+                      (click)="verify(seller)"
+                    >
+                      {{ 'admin.sellers.verify' | t }}
+                    </button>
+                  }
+
+                  @if (seller.isSuspended) {
+                    <button
+                      type="button"
+                      class="bs-button bs-button--ghost"
+                      [disabled]="busy() === seller.id"
+                      (click)="reinstate(seller)"
+                    >
+                      {{ 'admin.sellers.reinstate' | t }}
+                    </button>
+                  } @else {
+                    <button
+                      type="button"
+                      class="bs-button bs-button--ghost card__suspend"
+                      [disabled]="busy() === seller.id"
+                      (click)="suspend(seller)"
+                    >
+                      {{ 'admin.sellers.suspend' | t }}
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+
+            @if (seller.suspensionReason) {
+              <p class="reason">
+                {{ 'admin.sellers.reason' | t }}: {{ seller.suspensionReason }}
+              </p>
+            }
+
+            <dl class="numbers">
+              <div>
+                <dt>{{ 'admin.sellers.listings' | t }}</dt>
+                <dd>{{ seller.listings }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'admin.sellers.onSale' | t }}</dt>
+                <dd>{{ seller.onSale }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'admin.sellers.sold' | t }}</dt>
+                <dd>{{ seller.sold }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'admin.sellers.rating' | t }}</dt>
+                <dd>
+                  @if (seller.ratingAverage !== null) {
+                    {{ seller.ratingAverage }} ({{ seller.ratingCount }})
+                  } @else {
+                    —
+                  }
+                </dd>
+              </div>
+            </dl>
+          </li>
+        }
+      </ul>
+
+      <ui-pagination
+        [page]="page.page"
+        [totalPages]="page.totalPages"
+        (pageChange)="goToPage($event)"
+      />
+    }
+  }
+}

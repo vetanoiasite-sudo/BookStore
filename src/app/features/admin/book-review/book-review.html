@@ -1,0 +1,323 @@
+@switch (state()) {
+  @case ('loading') {
+    <ui-skeleton height="2.5rem" />
+    <div class="skeletons">
+      @for (placeholder of [1, 2, 3, 4]; track placeholder) {
+        <ui-skeleton height="6rem" />
+      }
+    </div>
+  }
+
+  @case ('error') {
+    <ui-error-state
+      title="admin.review.error.title"
+      text="admin.review.error.text"
+      (retry)="load()"
+    />
+  }
+
+  @default {
+    @if (book(); as current) {
+      <header class="bs-page-header">
+        <div>
+          <h1>{{ current.title }}</h1>
+          <p>
+            {{ current.publicId }}
+            &middot; {{ 'admin.review.seller' | t }}: {{ current.seller.displayName }}
+            ({{ current.seller.publicId }})
+          </p>
+        </div>
+
+        <div class="bs-page-header__actions">
+          <ui-status-badge [status]="current.status" />
+          <a class="bs-button bs-button--ghost" routerLink="/admin/books">
+            {{ 'common.back' | t }}
+          </a>
+        </div>
+      </header>
+
+      @if (current.status === 'rejected' && current.rejectionReason) {
+        <div class="notice notice--danger">
+          <strong>{{ 'admin.review.rejectedNotice' | t }}</strong>
+          <p>{{ current.rejectionReason }}</p>
+        </div>
+      }
+
+      <div class="layout">
+        <div class="main">
+          <section class="bs-card">
+            <h2 class="bs-card__title">{{ 'admin.review.photos' | t }}</h2>
+
+            @if (current.images.length === 0) {
+              <p class="bs-hint">{{ 'admin.review.noPhotos' | t }}</p>
+            } @else {
+              <ul class="gallery">
+                @for (image of current.images; track image.id) {
+                  <li>
+                    <img
+                      class="gallery__image"
+                      [src]="image.url"
+                      [alt]="image.altText ?? current.title"
+                      [width]="image.width"
+                      [height]="image.height"
+                      loading="lazy"
+                    />
+                    <span class="gallery__type">{{ 'imageType.' + image.type | t }}</span>
+                  </li>
+                }
+              </ul>
+            }
+          </section>
+
+          <section class="bs-card">
+            <h2 class="bs-card__title">{{ 'admin.review.details' | t }}</h2>
+
+            <dl class="facts">
+              <div class="facts__row">
+                <dt>{{ 'seller.form.field.price' | t }}</dt>
+                <dd>{{ current.price | price: current.currency }}</dd>
+              </div>
+              <div class="facts__row">
+                <dt>{{ 'seller.form.field.category' | t }}</dt>
+                <dd>{{ current.categoryNameAr }} / {{ current.categoryNameEn }}</dd>
+              </div>
+              <div class="facts__row">
+                <dt>{{ 'seller.form.field.author' | t }}</dt>
+                <dd>{{ current.authorName ?? '—' }}</dd>
+              </div>
+              <div class="facts__row">
+                <dt>{{ 'seller.form.field.publisher' | t }}</dt>
+                <dd>{{ current.publisherName ?? '—' }}</dd>
+              </div>
+              <div class="facts__row">
+                <dt>{{ 'seller.form.field.isbn' | t }}</dt>
+                <dd>{{ current.isbn ?? '—' }}</dd>
+              </div>
+              <div class="facts__row">
+                <dt>{{ 'seller.form.field.language' | t }}</dt>
+                <dd>{{ current.language | languageLabel }}</dd>
+              </div>
+              <div class="facts__row">
+                <dt>{{ 'seller.form.field.year' | t }}</dt>
+                <dd>{{ current.publicationYear ?? '—' }}</dd>
+              </div>
+              <div class="facts__row">
+                <dt>{{ 'seller.form.field.pages' | t }}</dt>
+                <dd>{{ current.pageCount ?? '—' }}</dd>
+              </div>
+            </dl>
+
+            @if (current.description) {
+              <p class="description">{{ current.description }}</p>
+            }
+          </section>
+
+          <section class="bs-card">
+            <h2 class="bs-card__title">{{ 'seller.form.section.condition' | t }}</h2>
+
+            <dl class="facts">
+              <div class="facts__row">
+                <dt>{{ 'seller.form.field.grade' | t }}</dt>
+                <dd>{{ current.condition.grade | conditionLabel }}</dd>
+              </div>
+              <div class="facts__row">
+                <dt>{{ 'condition.cover' | t }}</dt>
+                <dd>{{ current.condition.coverCondition | conditionLabel }}</dd>
+              </div>
+              <div class="facts__row">
+                <dt>{{ 'condition.pages' | t }}</dt>
+                <dd>{{ current.condition.pagesCondition | conditionLabel }}</dd>
+              </div>
+            </dl>
+
+            <ul class="flags">
+              @if (current.condition.hasWritingInside) {
+                <li>{{ 'condition.writingInside' | t }}</li>
+              }
+              @if (current.condition.hasHighlighting) {
+                <li>{{ 'condition.highlighting' | t }}</li>
+              }
+              @if (current.condition.hasTornPages) {
+                <li>{{ 'condition.tornPages' | t }}</li>
+              }
+              @if (current.condition.hasMissingPages) {
+                <li>{{ 'condition.missingPages' | t }}</li>
+              }
+              @if (current.condition.hasYellowing) {
+                <li>{{ 'condition.yellowing' | t }}</li>
+              }
+            </ul>
+
+            @if (current.condition.otherDamage) {
+              <p class="description">{{ current.condition.otherDamage }}</p>
+            }
+            @if (current.condition.notes) {
+              <p class="description">{{ current.condition.notes }}</p>
+            }
+          </section>
+        </div>
+
+        <aside class="side">
+          <section class="bs-card">
+            <h2 class="bs-card__title">{{ 'admin.review.actions' | t }}</h2>
+
+            @if (canDecide()) {
+              <div class="actions">
+                <button
+                  class="bs-button bs-button--block"
+                  type="button"
+                  [disabled]="working()"
+                  (click)="approve()"
+                >
+                  {{ 'admin.review.approve' | t }}
+                </button>
+
+                @if (rejecting()) {
+                  <div class="bs-field">
+                    <label class="bs-label" for="reason">{{ 'admin.review.reason' | t }}</label>
+                    <textarea
+                      id="reason"
+                      class="bs-textarea"
+                      [(ngModel)]="rejectionReason"
+                      name="rejectionReason"
+                    ></textarea>
+                    <p class="bs-hint">{{ 'admin.review.reasonHint' | t }}</p>
+                  </div>
+
+                  <button
+                    class="bs-button bs-button--danger bs-button--block"
+                    type="button"
+                    [disabled]="working()"
+                    (click)="reject()"
+                  >
+                    {{ 'admin.review.confirmReject' | t }}
+                  </button>
+                  <button
+                    class="bs-button bs-button--ghost bs-button--block"
+                    type="button"
+                    (click)="rejecting.set(false)"
+                  >
+                    {{ 'common.cancel' | t }}
+                  </button>
+                } @else {
+                  <button
+                    class="bs-button bs-button--ghost bs-button--block"
+                    type="button"
+                    (click)="rejecting.set(true)"
+                  >
+                    {{ 'admin.review.reject' | t }}
+                  </button>
+                }
+              </div>
+            } @else if (canReceive()) {
+              <p class="bs-hint">{{ 'admin.review.awaitingDelivery' | t }}</p>
+              <button
+                class="bs-button bs-button--block"
+                type="button"
+                [disabled]="working()"
+                (click)="receive()"
+              >
+                {{ 'admin.review.receive' | t }}
+              </button>
+            } @else if (canShelve()) {
+              <p class="bs-hint">{{ 'admin.review.shelveHint' | t }}</p>
+
+              <div class="bs-field">
+                <label class="bs-label" for="location">{{ 'admin.review.location' | t }}</label>
+                <select id="location" class="bs-select" [(ngModel)]="locationId" name="locationId">
+                  @for (location of locations(); track location.id) {
+                    <option [value]="location.id">
+                      {{ location.code }} ({{ location.itemCount }})
+                    </option>
+                  }
+                </select>
+              </div>
+
+              <div class="bs-field">
+                <label class="bs-label" for="shelfNotes">{{ 'admin.review.notes' | t }}</label>
+                <input
+                  id="shelfNotes"
+                  class="bs-input"
+                  type="text"
+                  [(ngModel)]="shelfNotes"
+                  name="shelfNotes"
+                />
+              </div>
+
+              <button
+                class="bs-button bs-button--block"
+                type="button"
+                [disabled]="working()"
+                (click)="shelve()"
+              >
+                {{ 'admin.review.shelve' | t }}
+              </button>
+            } @else {
+              <p class="bs-hint">{{ 'admin.review.noActions' | t }}</p>
+            }
+          </section>
+
+          @if (current.placement; as placement) {
+            <section class="bs-card">
+              <h2 class="bs-card__title">{{ 'admin.review.placement' | t }}</h2>
+              <p class="placement__code">{{ placement.code }}</p>
+              <p class="bs-hint">{{ placement.description }}</p>
+              <p class="bs-hint">
+                {{ 'admin.review.receivedAt' | t }}:
+                <time [attr.datetime]="placement.receivedAt">
+                  {{ placement.receivedAt | date: 'short' }}
+                </time>
+              </p>
+              @if (placement.notes) {
+                <p class="bs-hint">{{ placement.notes }}</p>
+              }
+            </section>
+          }
+
+          <section class="bs-card">
+            <h2 class="bs-card__title">{{ 'admin.review.sellerRecord' | t }}</h2>
+            <dl class="facts">
+              <div class="facts__row">
+                <dt>{{ 'admin.review.sellerListings' | t }}</dt>
+                <dd>{{ current.seller.totalListings }}</dd>
+              </div>
+              <div class="facts__row">
+                <dt>{{ 'admin.review.sellerSales' | t }}</dt>
+                <dd>{{ current.seller.totalSales }}</dd>
+              </div>
+              <div class="facts__row">
+                <dt>{{ 'admin.review.sellerRating' | t }}</dt>
+                <dd>
+                  {{ current.seller.ratingCount > 0 ? current.seller.ratingAverage : '—' }}
+                </dd>
+              </div>
+              <div class="facts__row">
+                <dt>{{ 'admin.review.sellerVerified' | t }}</dt>
+                <dd>{{ (current.seller.isVerified ? 'common.yes' : 'common.no') | t }}</dd>
+              </div>
+            </dl>
+          </section>
+
+          @if (current.timeline.length > 0) {
+            <section class="bs-card">
+              <h2 class="bs-card__title">{{ 'seller.form.section.timeline' | t }}</h2>
+              <ol class="timeline">
+                @for (entry of current.timeline; track entry.at) {
+                  <li class="timeline__entry">
+                    <ui-status-badge [status]="entry.toStatus" />
+                    <time class="timeline__at" [attr.datetime]="entry.at">
+                      {{ entry.at | date: 'short' }}
+                    </time>
+                    @if (entry.reason) {
+                      <p class="timeline__reason">{{ entry.reason }}</p>
+                    }
+                  </li>
+                }
+              </ol>
+            </section>
+          }
+        </aside>
+      </div>
+    }
+  }
+}

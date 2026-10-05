@@ -1,0 +1,38 @@
+@use '../../../../styles/tokens' as t;
+@use '../../../../styles/mixins' as m;
+
+.skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bs-space-2);
+}
+
+.row__title {
+  display: block;
+  font-weight: 600;
+  color: var(--bs-text);
+}
+
+.row__author,
+.row__seller {
+  display: block;
+  font-size: var(--bs-text-xs);
+  color: var(--bs-text-muted);
+}
+
+.row__code {
+  display: block;
+  font-family: ui-monospace, 'Cascadia Mono', 'Consolas', monospace;
+  font-size: var(--bs-text-xs);
+  color: var(--bs-text-muted);
+  white-space: nowrap;
+}
+
+.row__actions {
+  text-align: end;
+}
+
+.row__action {
+  color: var(--bs-primary);
+  font-size: var(--bs-text-sm);
+}

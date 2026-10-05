@@ -1,0 +1,235 @@
+@switch (state()) {
+  @case ('loading') {
+    <section class="page">
+      <div class="bs-container layout">
+        <div class="gallery">
+          <ui-skeleton height="100%" />
+        </div>
+        <div class="summary">
+          <ui-skeleton width="30%" height="0.8rem" />
+          <ui-skeleton width="80%" height="2rem" />
+          <ui-skeleton width="50%" height="1rem" />
+          <ui-skeleton width="35%" height="2rem" />
+          <ui-skeleton width="100%" height="3rem" />
+        </div>
+      </div>
+    </section>
+  }
+
+  @case ('missing') {
+    <section class="page">
+      <div class="bs-container">
+        <ui-empty-state title="book.notFound.title" text="book.notFound.text" />
+      </div>
+    </section>
+  }
+
+  @case ('error') {
+    <section class="page">
+      <div class="bs-container">
+        <ui-error-state title="books.error.title" text="books.error.text" (retry)="load()" />
+      </div>
+    </section>
+  }
+
+  @default {
+    @if (book(); as item) {
+      <section class="page">
+        <div class="bs-container layout">
+          <!-- Gallery -->
+          <div class="gallery">
+            @if (item.images.length > 0) {
+              <figure class="gallery__main">
+                <img
+                  [src]="item.images[activeImage()].url"
+                  [alt]="item.images[activeImage()].altText ?? item.title"
+                  [width]="item.images[activeImage()].width"
+                  [height]="item.images[activeImage()].height"
+                  decoding="async"
+                />
+              </figure>
+
+              @if (item.images.length > 1) {
+                <ul class="gallery__thumbs">
+                  @for (image of item.images; track image.url; let index = $index) {
+                    <li>
+                      <button
+                        type="button"
+                        class="gallery__thumb"
+                        [class.gallery__thumb--active]="index === activeImage()"
+                        [attr.aria-label]="'book.gallery.thumbnail' | t: { number: index + 1 }"
+                        [attr.aria-current]="index === activeImage()"
+                        (click)="showImage(index)"
+                      >
+                        <img [src]="image.url" [alt]="" aria-hidden="true" loading="lazy" />
+                      </button>
+                    </li>
+                  }
+                </ul>
+              }
+            } @else {
+              <div class="gallery__fallback" aria-hidden="true">
+                <span>{{ item.title.charAt(0) }}</span>
+              </div>
+            }
+          </div>
+
+          <!-- Summary -->
+          <div class="summary">
+            <p class="summary__category">
+              {{ item.categoryNameAr | categoryName: item.categoryNameEn }}
+            </p>
+
+            <h1 class="summary__title">{{ item.title }}</h1>
+
+            <p class="summary__author">{{ item.authorName ?? ('book.unknown' | t) }}</p>
+
+            <p class="summary__condition">
+              <span class="badge">{{ item.condition.grade | conditionLabel }}</span>
+            </p>
+
+            <p class="summary__price">{{ item.price | price: item.currency }}</p>
+
+            @if (!item.isAvailable) {
+              <p class="summary__sold">{{ 'book.soldOut' | t }}</p>
+            }
+
+            <div class="summary__actions">
+              @if (item.isAvailable) {
+                @if (inCart()) {
+                  <a class="button button--primary" routerLink="/cart">{{ 'book.goToCart' | t }}</a>
+                } @else {
+                  <button
+                    type="button"
+                    class="button button--primary"
+                    [disabled]="adding()"
+                    (click)="addToCart(item)"
+                  >
+                    {{ 'book.addToCart' | t }}
+                  </button>
+                }
+              }
+
+              <!-- Saving works on a sold copy too: it is a bookmark, not a purchase -->
+              <button
+                type="button"
+                class="button button--ghost"
+                [disabled]="saving()"
+                [attr.aria-pressed]="saved()"
+                (click)="toggleSaved(item)"
+              >
+                {{ (saved() ? 'book.saved' : 'book.favorite') | t }}
+              </button>
+            </div>
+
+            <!--
+              Signing in is what these buttons need, and saying so before the tap is
+              kinder than sending someone away after it.
+            -->
+            @if (!canShop()) {
+              <p class="summary__signin">
+                <a routerLink="/auth/login" [queryParams]="{ returnUrl: '/books/' + item.urlSegment }">
+                  {{ 'book.signInToBuy' | t }}
+                </a>
+              </p>
+            }
+
+            <!-- The seller, described without identifying them -->
+            <section class="seller">
+              <h2 class="seller__title">{{ 'seller.title' | t }}</h2>
+              <p class="seller__status">
+                {{ (item.seller.isVerified ? 'seller.verified' : 'seller.unverified') | t }}
+              </p>
+              <p class="seller__record">
+                @if (item.seller.totalSales > 0) {
+                  {{ 'seller.sales' | t: { count: item.seller.totalSales } }}
+                } @else {
+                  {{ 'seller.noSales' | t }}
+                }
+                ·
+                @if (item.seller.ratingAverage !== null) {
+                  {{
+                    'seller.rating'
+                      | t: { rating: item.seller.ratingAverage, count: item.seller.ratingCount }
+                  }}
+                } @else {
+                  {{ 'seller.noRating' | t }}
+                }
+              </p>
+              <p class="seller__privacy">{{ 'seller.privacy' | t }}</p>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <!-- Description and specifications -->
+      <section class="panels">
+        <div class="bs-container panels__inner">
+          <article class="panel">
+            <h2 class="panel__title">{{ 'book.description' | t }}</h2>
+            <p class="panel__text">
+              {{ item.description ?? ('book.noDescription' | t) }}
+            </p>
+
+            <h3 class="panel__subtitle">{{ 'book.details' | t }}</h3>
+            <dl class="specs">
+              <div><dt>{{ 'book.author' | t }}</dt><dd>{{ item.authorName ?? ('book.unknown' | t) }}</dd></div>
+              <div><dt>{{ 'book.publisher' | t }}</dt><dd>{{ item.publisherName ?? ('book.unknown' | t) }}</dd></div>
+              <div><dt>{{ 'book.category' | t }}</dt><dd>{{ item.categoryNameAr | categoryName: item.categoryNameEn }}</dd></div>
+              <div><dt>{{ 'book.language' | t }}</dt><dd>{{ item.language | languageLabel }}</dd></div>
+              <div><dt>{{ 'book.isbn' | t }}</dt><dd>{{ item.isbn ?? ('book.unknown' | t) }}</dd></div>
+              <div><dt>{{ 'book.year' | t }}</dt><dd>{{ item.publicationYear ?? ('book.unknown' | t) }}</dd></div>
+              <div><dt>{{ 'book.pages' | t }}</dt><dd>{{ item.pageCount ?? ('book.unknown' | t) }}</dd></div>
+              <div><dt>{{ 'book.code' | t }}</dt><dd>{{ item.publicId }}</dd></div>
+            </dl>
+          </article>
+
+          <article class="panel">
+            <h2 class="panel__title">{{ 'condition.title' | t }}</h2>
+
+            <dl class="specs">
+              <div><dt>{{ 'condition.cover' | t }}</dt><dd>{{ item.condition.coverCondition | conditionLabel }}</dd></div>
+              <div><dt>{{ 'condition.pages' | t }}</dt><dd>{{ item.condition.pagesCondition | conditionLabel }}</dd></div>
+            </dl>
+
+            <h3 class="panel__subtitle">{{ 'condition.flags.title' | t }}</h3>
+
+            @if (flags().length === 0 && !item.condition.otherDamage) {
+              <p class="panel__text panel__text--positive">{{ 'condition.noIssues' | t }}</p>
+            } @else {
+              <ul class="flags">
+                @for (flag of flags(); track flag.key) {
+                  <li class="flags__item">{{ flag.labelKey | t }}</li>
+                }
+                @if (item.condition.otherDamage) {
+                  <li class="flags__item">
+                    {{ 'condition.otherDamage' | t }}: {{ item.condition.otherDamage }}
+                  </li>
+                }
+              </ul>
+            }
+
+            @if (item.condition.notes) {
+              <h3 class="panel__subtitle">{{ 'condition.notes' | t }}</h3>
+              <p class="panel__text">{{ item.condition.notes }}</p>
+            }
+          </article>
+        </div>
+      </section>
+
+      <!-- Suggestions -->
+      @if (similar().length > 0) {
+        <section class="similar">
+          <div class="bs-container">
+            <h2 class="similar__title">{{ 'book.similar' | t }}</h2>
+            <div class="grid">
+              @for (other of similar(); track other.publicId) {
+                <book-card [book]="other" />
+              }
+            </div>
+          </div>
+        </section>
+      }
+    }
+  }
+}

@@ -1,0 +1,131 @@
+<form class="bs-form" [formGroup]="form" (ngSubmit)="submit()">
+  <div class="grid">
+    <div class="bs-field">
+      <label class="bs-label" for="address-label">{{ 'address.label' | t }}</label>
+      <input id="address-label" class="bs-input" formControlName="label" autocomplete="off" />
+      @if (invalid('label')) {
+        <p class="bs-error">{{ 'address.error.label' | t }}</p>
+      }
+    </div>
+
+    <div class="bs-field">
+      <label class="bs-label" for="address-recipient">{{ 'address.recipient' | t }}</label>
+      <input
+        id="address-recipient"
+        class="bs-input"
+        formControlName="recipientName"
+        autocomplete="name"
+      />
+      @if (invalid('recipientName')) {
+        <p class="bs-error">{{ 'address.error.recipient' | t }}</p>
+      }
+    </div>
+
+    <div class="bs-field">
+      <label class="bs-label" for="address-phone">{{ 'address.phone' | t }}</label>
+      <input
+        id="address-phone"
+        class="bs-input"
+        formControlName="phoneNumber"
+        inputmode="tel"
+        autocomplete="tel"
+      />
+      <p class="bs-hint">{{ 'address.phoneHint' | t }}</p>
+      @if (invalid('phoneNumber')) {
+        <p class="bs-error">{{ 'address.error.phone' | t }}</p>
+      }
+    </div>
+
+    <div class="bs-field">
+      <label class="bs-label" for="address-country">{{ 'address.country' | t }}</label>
+      <input
+        id="address-country"
+        class="bs-input"
+        formControlName="country"
+        autocomplete="country-name"
+      />
+      @if (invalid('country')) {
+        <p class="bs-error">{{ 'address.error.country' | t }}</p>
+      }
+    </div>
+
+    <div class="bs-field">
+      <label class="bs-label" for="address-city">{{ 'address.city' | t }}</label>
+      <input
+        id="address-city"
+        class="bs-input"
+        formControlName="city"
+        autocomplete="address-level2"
+      />
+      @if (invalid('city')) {
+        <p class="bs-error">{{ 'address.error.city' | t }}</p>
+      }
+    </div>
+
+    <div class="bs-field">
+      <label class="bs-label" for="address-district">{{ 'address.district' | t }}</label>
+      <input
+        id="address-district"
+        class="bs-input"
+        formControlName="district"
+        autocomplete="address-level3"
+      />
+    </div>
+
+    <div class="bs-field bs-field--wide">
+      <label class="bs-label" for="address-street">{{ 'address.street' | t }}</label>
+      <input
+        id="address-street"
+        class="bs-input"
+        formControlName="street"
+        autocomplete="address-line1"
+      />
+      @if (invalid('street')) {
+        <p class="bs-error">{{ 'address.error.street' | t }}</p>
+      }
+    </div>
+
+    <div class="bs-field">
+      <label class="bs-label" for="address-building">{{ 'address.building' | t }}</label>
+      <input id="address-building" class="bs-input" formControlName="buildingNumber" />
+    </div>
+
+    <div class="bs-field">
+      <label class="bs-label" for="address-apartment">{{ 'address.apartment' | t }}</label>
+      <input id="address-apartment" class="bs-input" formControlName="apartment" />
+    </div>
+
+    <div class="bs-field">
+      <label class="bs-label" for="address-postal">{{ 'address.postalCode' | t }}</label>
+      <input
+        id="address-postal"
+        class="bs-input"
+        formControlName="postalCode"
+        autocomplete="postal-code"
+      />
+    </div>
+
+    <div class="bs-field bs-field--wide">
+      <label class="bs-label" for="address-notes">{{ 'address.notes' | t }}</label>
+      <textarea id="address-notes" class="bs-textarea" formControlName="notes"></textarea>
+      <p class="bs-hint">{{ 'address.notesHint' | t }}</p>
+    </div>
+  </div>
+
+  <label class="bs-check">
+    <input type="checkbox" formControlName="isDefault" />
+    {{ 'address.makeDefault' | t }}
+  </label>
+
+  <div class="actions">
+    <button type="submit" class="bs-button" [disabled]="saving()">
+      {{ (saving() ? 'common.saving' : 'common.save') | t }}
+    </button>
+
+    @if (cancellable()) {
+      <button type="button" class="bs-button bs-button--ghost" (click)="cancelled.emit()">
+        {{ 'common.cancel' | t }}
+      </button>
+    }
+  </div>
+</form>

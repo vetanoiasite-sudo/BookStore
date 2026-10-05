@@ -1,0 +1,47 @@
+<h1 class="title">{{ 'auth.signIn' | t }}</h1>
+<p class="lead">{{ 'auth.signIn.lead' | t }}</p>
+
+<form class="bs-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  @if (failure(); as message) {
+    <p class="alert" role="alert">{{ message }}</p>
+  }
+
+  <div class="bs-field">
+    <label class="bs-label" for="email">{{ 'auth.email' | t }}</label>
+    <input
+      id="email"
+      class="bs-input"
+      type="email"
+      autocomplete="email"
+      formControlName="email"
+      [attr.aria-invalid]="form.controls.email.touched && form.controls.email.invalid"
+    />
+    @if (form.controls.email.touched && form.controls.email.invalid) {
+      <p class="bs-error">{{ 'auth.error.email' | t }}</p>
+    }
+  </div>
+
+  <div class="bs-field">
+    <label class="bs-label" for="password">{{ 'auth.password' | t }}</label>
+    <input
+      id="password"
+      class="bs-input"
+      type="password"
+      autocomplete="current-password"
+      formControlName="password"
+      [attr.aria-invalid]="form.controls.password.touched && form.controls.password.invalid"
+    />
+    @if (form.controls.password.touched && form.controls.password.invalid) {
+      <p class="bs-error">{{ 'auth.error.passwordRequired' | t }}</p>
+    }
+  </div>
+
+  <button class="bs-button bs-button--block" type="submit" [disabled]="submitting()">
+    {{ (submitting() ? 'auth.signingIn' : 'auth.signIn') | t }}
+  </button>
+</form>
+
+<p class="switch">
+  {{ 'auth.noAccount' | t }}
+  <a routerLink="/auth/register">{{ 'auth.register' | t }}</a>
+</p>

@@ -1,0 +1,121 @@
+@use 'tokens' as t;
+
+@mixin from($breakpoint) {
+  @media (min-width: $breakpoint) {
+    @content;
+  }
+}
+
+@mixin until($breakpoint) {
+  @media (max-width: ($breakpoint - 1px)) {
+    @content;
+  }
+}
+
+/// Centred page container with responsive gutters.
+@mixin container {
+  width: 100%;
+  max-width: var(--bs-container);
+  margin-inline: auto;
+  padding-inline: var(--bs-space-4);
+
+  @include from(t.$bs-bp-lg) {
+    padding-inline: var(--bs-space-6);
+  }
+}
+
+/// Visible focus ring that works on both light surfaces and the brand colour.
+@mixin focus-ring {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
+}
+
+/// Clamp text to a fixed number of lines.
+@mixin line-clamp($lines) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/// Hide visually while keeping the text available to screen readers.
+@mixin visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/// The SuperPark button: a near-square purple block with yellow uppercase
+/// lettering. Variants swap the colours; the shape never changes.
+@mixin button-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--bs-space-2);
+  padding: 0.7em 1.8em;
+  border: 0;
+  border-radius: var(--bs-radius-sm);
+  background: var(--bs-primary);
+  box-shadow: var(--bs-shadow-sm);
+  color: var(--bs-highlight);
+  font-family: var(--bs-font-display);
+  font-size: var(--bs-text-sm);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--bs-transition),
+    color var(--bs-transition),
+    box-shadow var(--bs-transition),
+    transform var(--bs-transition);
+
+  &:hover:not(:disabled) {
+    background: var(--bs-primary-hover);
+    color: var(--bs-highlight);
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: var(--bs-shadow-md);
+  }
+
+  &:active:not(:disabled) {
+    transform: none;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+/// Yellow block with plum lettering, for use on purple or plum backgrounds.
+@mixin button-highlight {
+  background: var(--bs-highlight);
+  color: var(--bs-ink);
+
+  &:hover:not(:disabled) {
+    background: var(--bs-highlight-hover);
+    color: var(--bs-ink);
+  }
+}
+
+/// Outlined in purple on light surfaces.
+@mixin button-outline {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--bs-primary);
+  color: var(--bs-primary);
+
+  &:hover:not(:disabled) {
+    background: var(--bs-primary);
+    box-shadow: inset 0 0 0 2px var(--bs-primary);
+    color: var(--bs-highlight);
+  }
+}

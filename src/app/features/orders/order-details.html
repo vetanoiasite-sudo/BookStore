@@ -1,0 +1,184 @@
+<section class="order">
+  <div class="bs-container">
+    @switch (state()) {
+      @case ('loading') {
+        <div class="bs-card" aria-hidden="true">
+          <ui-skeleton width="30%" height="1.4rem" />
+          <ui-skeleton width="60%" height="0.9rem" />
+          <ui-skeleton width="80%" height="0.9rem" />
+        </div>
+      }
+
+      @case ('missing') {
+        <div class="bs-card missing">
+          <h1>{{ 'orders.notFound.title' | t }}</h1>
+          <p>{{ 'orders.notFound.text' | t }}</p>
+          <a class="bs-button" routerLink="/orders">{{ 'orders.backToList' | t }}</a>
+        </div>
+      }
+
+      @case ('error') {
+        <ui-error-state title="orders.error.title" text="orders.error.text" (retry)="load()" />
+      }
+
+      @default {
+        @if (order(); as item) {
+          <header class="bs-page-header">
+            <div>
+              <h1>{{ item.orderNumber }}</h1>
+              <p>{{ item.placedAt | date: 'medium' }}</p>
+            </div>
+
+            <div class="bs-page-header__actions">
+              <span class="status">{{ item.status | orderStatusLabel }}</span>
+            </div>
+          </header>
+
+          <!-- Nobody has paid yet, and the copies are being held meanwhile -->
+          @if (awaitingPayment() && item.reservationExpiresAt) {
+            <p class="notice" role="status">
+              {{ 'orders.reservedUntil' | t }}
+              <strong>{{ item.reservationExpiresAt | date: 'short' }}</strong>
+              — {{ 'orders.paymentSoon' | t }}
+            </p>
+          }
+
+          @if (item.status === 'cancelled') {
+            <p class="notice notice--off" role="status">
+              {{ 'orders.cancelledOn' | t }}
+              <strong>{{ item.cancelledAt | date: 'short' }}</strong>
+              @if (item.cancellationReason) {
+                — {{ item.cancellationReason }}
+              }
+            </p>
+          }
+
+          <div class="layout">
+            <div class="column">
+              <!-- What was bought -->
+              <section class="bs-card">
+                <h2 class="bs-card__title">{{ 'orders.items' | t }}</h2>
+
+                <ul class="lines">
+                  @for (line of item.items; track line.bookPublicId) {
+                    <li class="line">
+                      <a class="line__cover" [routerLink]="['/books', line.bookPublicId]">
+                        @if (line.coverImageUrl; as cover) {
+                          <img [src]="cover" [alt]="line.title" loading="lazy" width="56" height="80" />
+                        } @else {
+                          <span class="line__cover-fallback" aria-hidden="true">
+                            {{ line.title.charAt(0) }}
+                          </span>
+                        }
+                      </a>
+
+                      <div class="line__body">
+                        <h3 class="line__title">
+                          <a [routerLink]="['/books', line.bookPublicId]">{{ line.title }}</a>
+                        </h3>
+                        <p class="line__author">{{ line.authorName ?? ('book.unknown' | t) }}</p>
+                        <p class="line__meta">
+                          <span class="line__condition">{{ line.condition | conditionLabel }}</span>
+                          <span class="line__code">{{ line.bookPublicId }}</span>
+                        </p>
+                      </div>
+
+                      <p class="line__price">{{ line.price | price: item.currency }}</p>
+                    </li>
+                  }
+                </ul>
+              </section>
+
+              <!-- Where it is going -->
+              <section class="bs-card">
+                <h2 class="bs-card__title">{{ 'orders.shippingTo' | t }}</h2>
+
+                <p class="address__recipient">{{ item.shippingAddress.recipientName }}</p>
+                <p class="address__line">{{ item.shippingAddress.formatted }}</p>
+                <p class="address__phone">{{ item.shippingAddress.phoneNumber }}</p>
+
+                @if (item.shippingAddress.notes) {
+                  <p class="address__notes">{{ item.shippingAddress.notes }}</p>
+                }
+              </section>
+
+              <!-- How far it has got -->
+              @if (steps().length > 0) {
+                <section class="bs-card">
+                  <h2 class="bs-card__title">{{ 'orders.progress' | t }}</h2>
+
+                  <ol class="steps">
+                    @for (step of steps(); track step.key) {
+                      <li class="step" [class.step--done]="step.done">
+                        <span class="step__mark" aria-hidden="true"></span>
+                        <span class="step__body">
+                          <span class="step__label">{{ step.labelKey | t }}</span>
+                          @if (step.at) {
+                            <span class="step__at">{{ step.at | date: 'short' }}</span>
+                          }
+                        </span>
+                      </li>
+                    }
+                  </ol>
+                </section>
+              }
+            </div>
+
+            <!-- What it came to, and what can still be done about it -->
+            <aside class="bs-card summary">
+              <h2 class="bs-card__title">{{ 'cart.summary.title' | t }}</h2>
+
+              <dl class="summary__rows">
+                <div class="summary__row">
+                  <dt>{{ 'cart.summary.subtotal' | t }}</dt>
+                  <dd>{{ item.subtotal | price: item.currency }}</dd>
+                </div>
+                <div class="summary__row">
+                  <dt>{{ 'checkout.shipping' | t }}</dt>
+                  <dd>{{ item.shippingCost | price: item.currency }}</dd>
+                </div>
+
+                @if (item.discount > 0) {
+                  <div class="summary__row">
+                    <dt>{{ 'orders.discount' | t }}</dt>
+                    <dd>-{{ item.discount | price: item.currency }}</dd>
+                  </div>
+                }
+
+                <div class="summary__row summary__row--total">
+                  <dt>{{ 'checkout.total' | t }}</dt>
+                  <dd>{{ item.total | price: item.currency }}</dd>
+                </div>
+              </dl>
+
+              @if (item.canConfirmReceipt) {
+                <button
+                  type="button"
+                  class="bs-button bs-button--block"
+                  [disabled]="busy()"
+                  (click)="confirmReceipt(item)"
+                >
+                  {{ 'orders.confirmReceipt' | t }}
+                </button>
+                <p class="summary__note">{{ 'orders.confirmReceiptHint' | t }}</p>
+              }
+
+              @if (item.canCancel) {
+                <button
+                  type="button"
+                  class="bs-button bs-button--ghost bs-button--block"
+                  [disabled]="busy()"
+                  (click)="cancel(item)"
+                >
+                  {{ 'orders.cancel' | t }}
+                </button>
+              }
+
+              <a class="summary__back" routerLink="/orders">{{ 'orders.backToList' | t }}</a>
+            </aside>
+          </div>
+        }
+      }
+    }
+  </div>
+</section>

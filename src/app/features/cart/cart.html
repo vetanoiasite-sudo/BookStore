@@ -1,0 +1,170 @@
+<section class="cart">
+  <div class="bs-container">
+    <header class="cart__header">
+      <h1 class="cart__title">{{ 'cart.title' | t }}</h1>
+      <p class="cart__lead">{{ 'cart.lead' | t }}</p>
+    </header>
+
+    @switch (state()) {
+      @case ('loading') {
+        <div class="layout">
+          <ul class="lines">
+            @for (placeholder of placeholders; track placeholder) {
+              <li class="line line--skeleton" aria-hidden="true">
+                <ui-skeleton width="72px" height="104px" />
+                <div class="line__body">
+                  <ui-skeleton width="60%" height="1.1rem" />
+                  <ui-skeleton width="35%" height="0.9rem" />
+                  <ui-skeleton width="25%" height="1.1rem" />
+                </div>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+
+      @case ('error') {
+        <ui-error-state title="cart.error.title" text="cart.error.text" (retry)="load()" />
+      }
+
+      @default {
+        @if (view(); as cart) {
+          @if (cart.itemCount === 0) {
+            <ui-empty-state title="cart.empty.title" text="cart.empty.text" />
+
+            <p class="cart__browse">
+              <a routerLink="/books">{{ 'cart.empty.action' | t }}</a>
+            </p>
+          } @else {
+            <div class="layout">
+              <div>
+                @if (cart.hasUnavailableItems) {
+                  <p class="notice notice--warning" role="status">
+                    {{ 'cart.notice.unavailable' | t }}
+                  </p>
+                }
+
+                @if (cart.hasPriceChanges) {
+                  <p class="notice" role="status">{{ 'cart.notice.priceChanged' | t }}</p>
+                }
+
+                <ul class="lines">
+                  @for (line of cart.items; track line.book.publicId) {
+                    <li class="line" [class.line--gone]="!line.isAvailable">
+                      <a class="line__cover" [routerLink]="['/books', line.book.urlSegment]">
+                        @if (line.book.coverImageUrl; as cover) {
+                          <img
+                            [src]="cover"
+                            [alt]="line.book.title"
+                            loading="lazy"
+                            decoding="async"
+                            width="72"
+                            height="104"
+                          />
+                        } @else {
+                          <span class="line__cover-fallback" aria-hidden="true">
+                            {{ line.book.title.charAt(0) }}
+                          </span>
+                        }
+                      </a>
+
+                      <div class="line__body">
+                        <p class="line__category">
+                          {{ line.book.categoryNameAr | categoryName: line.book.categoryNameEn }}
+                        </p>
+
+                        <h2 class="line__title">
+                          <a [routerLink]="['/books', line.book.urlSegment]">{{ line.book.title }}</a>
+                        </h2>
+
+                        <p class="line__author">
+                          {{ line.book.authorName ?? ('book.unknown' | t) }}
+                          <span class="line__condition">{{ line.book.condition | conditionLabel }}</span>
+                        </p>
+
+                        @if (!line.isAvailable) {
+                          <p class="line__gone">{{ 'cart.line.unavailable' | t }}</p>
+                        } @else if (line.priceChanged) {
+                          <p class="line__changed">
+                            {{ 'cart.line.priceWas' | t }}
+                            <s>{{ line.priceAtAdd | price: line.book.currency }}</s>
+                          </p>
+                        }
+                      </div>
+
+                      <div class="line__side">
+                        <p class="line__price">{{ line.book.price | price: line.book.currency }}</p>
+
+                        <button
+                          type="button"
+                          class="line__remove"
+                          [disabled]="removing() === line.book.publicId"
+                          (click)="remove(line)"
+                        >
+                          {{ 'cart.remove' | t }}
+                        </button>
+                      </div>
+                    </li>
+                  }
+                </ul>
+
+                <button
+                  type="button"
+                  class="cart__clear"
+                  [disabled]="clearing()"
+                  (click)="clear()"
+                >
+                  {{ 'cart.clear' | t }}
+                </button>
+              </div>
+
+              <aside class="summary" [attr.aria-label]="'cart.summary.title' | t">
+                <h2 class="summary__title">{{ 'cart.summary.title' | t }}</h2>
+
+                <dl class="summary__rows">
+                  <div class="summary__row">
+                    <dt>{{ 'cart.summary.items' | t }}</dt>
+                    <dd>{{ cart.availableCount }}</dd>
+                  </div>
+                  <div class="summary__row">
+                    <dt>{{ 'cart.summary.subtotal' | t }}</dt>
+                    <dd>{{ cart.subtotal | price: cart.currency }}</dd>
+                  </div>
+                  <div class="summary__row">
+                    <dt>{{ 'checkout.shipping' | t }}</dt>
+                    <dd>{{ cart.shippingCost | price: cart.currency }}</dd>
+                  </div>
+                  <div class="summary__row summary__row--total">
+                    <dt>{{ 'checkout.total' | t }}</dt>
+                    <dd>{{ cart.total | price: cart.currency }}</dd>
+                  </div>
+                </dl>
+
+                <p class="summary__note">{{ 'cart.summary.shippingNote' | t }}</p>
+
+                <!--
+                  A copy somebody else has bought cannot be checked out, and the
+                  button says so rather than sending the reader to a page that
+                  refuses them.
+                -->
+                @if (cart.hasUnavailableItems) {
+                  <p class="summary__blocked">{{ 'checkout.blocked' | t }}</p>
+
+                  <button type="button" class="summary__checkout" disabled>
+                    {{ 'cart.checkout' | t }}
+                  </button>
+                } @else {
+                  <a class="summary__checkout" routerLink="/checkout">
+                    {{ 'cart.checkout' | t }}
+                  </a>
+                }
+
+                <a class="summary__continue" routerLink="/books">{{ 'cart.continue' | t }}</a>
+              </aside>
+            </div>
+          }
+        }
+      }
+    }
+  </div>
+</section>

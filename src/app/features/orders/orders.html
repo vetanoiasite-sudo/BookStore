@@ -1,0 +1,90 @@
+<section class="orders">
+  <div class="bs-container">
+    <header class="bs-page-header">
+      <div>
+        <h1>{{ 'orders.title' | t }}</h1>
+        <p>{{ 'orders.lead' | t }}</p>
+      </div>
+    </header>
+
+    @switch (state()) {
+      @case ('loading') {
+        <ul class="list">
+          @for (placeholder of placeholders; track placeholder) {
+            <li class="bs-card" aria-hidden="true">
+              <ui-skeleton width="35%" height="1.1rem" />
+              <ui-skeleton width="60%" height="0.9rem" />
+              <ui-skeleton width="25%" height="0.9rem" />
+            </li>
+          }
+        </ul>
+      }
+
+      @case ('error') {
+        <ui-error-state title="orders.error.title" text="orders.error.text" (retry)="load()" />
+      }
+
+      @default {
+        @if (isEmpty()) {
+          <ui-empty-state title="orders.empty.title" text="orders.empty.text" />
+
+          <p class="orders__browse">
+            <a routerLink="/books">{{ 'cart.empty.action' | t }}</a>
+          </p>
+        } @else if (result(); as page) {
+          <ul class="list">
+            @for (order of page.items; track order.orderNumber) {
+              <li class="bs-card row">
+                <a class="row__link" [routerLink]="['/orders', order.orderNumber]">
+                  @if (order.coverImageUrl; as cover) {
+                    <img
+                      class="row__cover"
+                      [src]="cover"
+                      [alt]="order.title"
+                      loading="lazy"
+                      width="56"
+                      height="80"
+                    />
+                  } @else {
+                    <span class="row__cover row__cover--empty" aria-hidden="true"></span>
+                  }
+
+                  <span class="row__body">
+                    <span class="row__number">{{ order.orderNumber }}</span>
+                    <span class="row__title">{{ order.title }}</span>
+
+                    @if (order.itemCount > 1) {
+                      <span class="row__more">
+                        {{ 'orders.andMore' | t: { count: order.itemCount - 1 } }}
+                      </span>
+                    }
+
+                    <span class="row__date">{{ order.placedAt | date: 'medium' }}</span>
+                  </span>
+
+                  <span class="row__side">
+                    <span
+                      class="row__status"
+                      [class.row__status--waiting]="order.status === 'pendingPayment'"
+                      [class.row__status--done]="order.status === 'completed'"
+                      [class.row__status--off]="order.status === 'cancelled'"
+                    >
+                      {{ order.status | orderStatusLabel }}
+                    </span>
+                    <span class="row__total">{{ order.total | price: order.currency }}</span>
+                  </span>
+                </a>
+              </li>
+            }
+          </ul>
+
+          <ui-pagination
+            [page]="page.page"
+            [totalPages]="page.totalPages"
+            (pageChange)="goToPage($event)"
+          />
+        }
+      }
+    }
+  </div>
+</section>

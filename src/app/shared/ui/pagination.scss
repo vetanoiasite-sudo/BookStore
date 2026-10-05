@@ -1,0 +1,76 @@
+@use 'mixins' as m;
+@use 'tokens' as t;
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--bs-space-2);
+  margin-block-start: var(--bs-space-7);
+}
+
+.pagination__step,
+.pagination__page {
+  min-width: 2.5rem;
+  padding: var(--bs-space-2) var(--bs-space-3);
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius-sm);
+  background: var(--bs-surface);
+  color: var(--bs-text);
+  font-size: var(--bs-text-sm);
+  cursor: pointer;
+  transition:
+    border-color var(--bs-transition),
+    background var(--bs-transition);
+
+  &:hover:not(:disabled):not(.pagination__page--current) {
+    border-color: var(--bs-primary);
+    color: var(--bs-primary);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.pagination__step {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bs-space-1);
+  font-weight: 600;
+
+  // The chevrons are drawn as text, so they must flip with the writing direction.
+  span {
+    display: inline-block;
+  }
+
+  [dir='rtl'] & span {
+    transform: scaleX(-1);
+  }
+
+  @include m.until(t.$bs-bp-sm) {
+    // On a narrow screen the numbers are enough; the words take the whole row.
+    font-size: var(--bs-text-xs);
+    padding-inline: var(--bs-space-2);
+  }
+}
+
+.pagination__pages {
+  display: flex;
+  align-items: center;
+  gap: var(--bs-space-1);
+}
+
+.pagination__page--current {
+  border-color: var(--bs-primary);
+  background: var(--bs-primary);
+  color: var(--bs-text-inverse);
+  font-weight: 600;
+}
+
+.pagination__gap {
+  padding-inline: var(--bs-space-1);
+  color: var(--bs-text-muted);
+}

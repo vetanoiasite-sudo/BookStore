@@ -1,0 +1,25 @@
+@use 'mixins' as m;
+@use 'tokens' as t;
+
+.grid {
+  display: grid;
+  gap: var(--bs-space-4);
+  grid-template-columns: 1fr;
+
+  @include m.from(t.$bs-bp-md) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+// The street and the notes read as one line each rather than as half a line.
+.bs-field--wide {
+  @include m.from(t.$bs-bp-md) {
+    grid-column: 1 / -1;
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bs-space-2);
+}

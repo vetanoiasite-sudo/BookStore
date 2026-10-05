@@ -1,0 +1,85 @@
+<section class="categories">
+  <div class="bs-container">
+    <header class="categories__header">
+      <h1 class="categories__title">{{ 'nav.categories' | t }}</h1>
+      <p class="categories__lead">{{ 'categories.lead' | t }}</p>
+    </header>
+
+    @switch (state()) {
+      @case ('loading') {
+        <div class="sections">
+          @for (placeholder of placeholders; track placeholder) {
+            <div class="section" aria-hidden="true">
+              <ui-skeleton width="40%" height="1.3rem" />
+              <ui-skeleton width="90%" height="0.9rem" />
+              <ui-skeleton width="70%" height="0.9rem" />
+            </div>
+          }
+        </div>
+      }
+
+      @case ('error') {
+        <ui-error-state
+          title="categories.error.title"
+          text="books.error.text"
+          (retry)="load()"
+        />
+      }
+
+      @default {
+        @if (tree().length === 0) {
+          <ui-empty-state title="categories.empty.title" text="categories.empty.text" />
+        } @else {
+          <div class="sections">
+            @for (root of tree(); track root.slug) {
+              <section class="section">
+                <h2 class="section__title">
+                  <a [routerLink]="['/books']" [queryParams]="{ category: root.slug }">
+                    {{ root.nameAr | categoryName: root.nameEn }}
+                  </a>
+                  <span class="section__count">{{ root.bookCount }}</span>
+                </h2>
+
+                @if (root.children.length > 0) {
+                  <ul class="section__children">
+                    @for (child of root.children; track child.slug) {
+                      <li>
+                        <a
+                          class="child"
+                          [routerLink]="['/books']"
+                          [queryParams]="{ category: child.slug }"
+                        >
+                          <span class="child__name">{{ child.nameAr | categoryName: child.nameEn }}</span>
+                          <span class="child__count">{{ child.bookCount }}</span>
+                        </a>
+
+                        @if (child.children.length > 0) {
+                          <ul class="branches">
+                            @for (branch of child.children; track branch.slug) {
+                              <li>
+                                <a
+                                  class="branch"
+                                  [routerLink]="['/books']"
+                                  [queryParams]="{ category: branch.slug }"
+                                >
+                                  <span>{{ branch.nameAr | categoryName: branch.nameEn }}</span>
+                                  <span class="branch__count">{{ branch.bookCount }}</span>
+                                </a>
+                              </li>
+                            }
+                          </ul>
+                        }
+                      </li>
+                    }
+                  </ul>
+                } @else {
+                  <p class="section__none">{{ 'categories.noSubcategories' | t }}</p>
+                }
+              </section>
+            }
+          </div>
+        }
+      }
+    }
+  </div>
+</section>

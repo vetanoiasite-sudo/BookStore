@@ -1,0 +1,315 @@
+@use 'mixins' as m;
+@use 'tokens' as t;
+
+.page {
+  padding-block: var(--bs-space-6);
+}
+
+.layout {
+  display: grid;
+  gap: var(--bs-space-6);
+  grid-template-columns: 1fr;
+
+  @include m.from(t.$bs-bp-lg) {
+    // Gallery on the leading side, summary on the trailing side. Logical columns,
+    // so the two swap places when the interface switches to English.
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: var(--bs-space-7);
+  }
+}
+
+// --- Gallery --------------------------------------------------------------
+
+.gallery {
+  display: grid;
+  gap: var(--bs-space-3);
+  align-content: start;
+}
+
+.gallery__main {
+  margin: 0;
+  aspect-ratio: 2 / 3;
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius-md);
+  background: var(--bs-surface);
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.gallery__fallback {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 2 / 3;
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius-md);
+  background: var(--bs-surface-muted);
+  color: var(--bs-border-strong);
+  font-family: var(--bs-font-serif);
+  font-size: 5rem;
+}
+
+.gallery__thumbs {
+  display: flex;
+  gap: var(--bs-space-2);
+  overflow-x: auto;
+  padding-block-end: var(--bs-space-1);
+}
+
+.gallery__thumb {
+  width: 4.5rem;
+  aspect-ratio: 2 / 3;
+  padding: 0;
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius-sm);
+  background: var(--bs-surface);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color var(--bs-transition);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &:hover {
+    border-color: var(--bs-border-strong);
+  }
+}
+
+.gallery__thumb--active {
+  border-color: var(--bs-primary);
+  border-width: 2px;
+}
+
+// --- Summary --------------------------------------------------------------
+
+.summary {
+  display: grid;
+  align-content: start;
+  gap: var(--bs-space-3);
+}
+
+.summary__category {
+  margin: 0;
+  color: var(--bs-accent);
+  font-size: var(--bs-text-sm);
+  font-weight: 600;
+}
+
+.summary__title {
+  margin: 0;
+  font-family: var(--bs-font-serif);
+  font-size: clamp(1.5rem, 2.5vw + 0.5rem, 2.25rem);
+  line-height: 1.3;
+}
+
+.summary__author {
+  margin: 0;
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-lg);
+}
+
+.summary__condition {
+  margin: 0;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.2rem var(--bs-space-3);
+  border-radius: var(--bs-radius-pill);
+  background: var(--bs-primary-soft);
+  color: var(--bs-primary);
+  font-size: var(--bs-text-sm);
+  font-weight: 600;
+}
+
+.summary__price {
+  margin: var(--bs-space-2) 0 0;
+  color: var(--bs-primary);
+  font-size: var(--bs-text-3xl);
+  font-weight: 700;
+}
+
+.summary__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bs-space-3);
+  margin-block-start: var(--bs-space-2);
+}
+
+.summary__signin {
+  margin: var(--bs-space-2) 0 0;
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-sm);
+}
+
+.summary__sold {
+  margin: 0;
+  padding: var(--bs-space-3) var(--bs-space-4);
+  border-inline-start: 4px solid var(--bs-danger);
+  background: var(--bs-surface);
+  color: var(--bs-danger);
+  font-weight: 600;
+}
+
+.button {
+  @include m.button-base;
+  padding: 0.9em 2.2em;
+}
+
+.button--ghost {
+  @include m.button-outline;
+}
+
+// --- Seller ---------------------------------------------------------------
+
+.seller {
+  margin-block-start: var(--bs-space-4);
+  padding: var(--bs-space-4);
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius-md);
+  background: var(--bs-surface);
+}
+
+.seller__title {
+  margin: 0 0 var(--bs-space-2);
+  font-size: var(--bs-text-base);
+}
+
+.seller__status {
+  margin: 0;
+  font-weight: 600;
+}
+
+.seller__record {
+  margin: var(--bs-space-1) 0 0;
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-sm);
+}
+
+.seller__privacy {
+  margin: var(--bs-space-3) 0 0;
+  padding-block-start: var(--bs-space-3);
+  border-block-start: 1px solid var(--bs-border);
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-xs);
+}
+
+// --- Panels ---------------------------------------------------------------
+
+.panels {
+  padding-block: var(--bs-space-6);
+  background: var(--bs-surface-muted);
+}
+
+.panels__inner {
+  display: grid;
+  gap: var(--bs-space-5);
+  grid-template-columns: 1fr;
+
+  @include m.from(t.$bs-bp-md) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.panel {
+  padding: var(--bs-space-5);
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius-md);
+  background: var(--bs-surface);
+}
+
+.panel__title {
+  margin: 0 0 var(--bs-space-4);
+  font-family: var(--bs-font-serif);
+  font-size: var(--bs-text-xl);
+}
+
+.panel__subtitle {
+  margin: var(--bs-space-5) 0 var(--bs-space-3);
+  font-size: var(--bs-text-base);
+}
+
+.panel__text {
+  margin: 0;
+  color: var(--bs-text-muted);
+  line-height: 1.8;
+  white-space: pre-line;
+}
+
+.panel__text--positive {
+  color: var(--bs-success);
+}
+
+.specs {
+  display: grid;
+  gap: var(--bs-space-2);
+  margin: 0;
+
+  div {
+    display: flex;
+    gap: var(--bs-space-3);
+    padding-block: var(--bs-space-2);
+    border-block-end: 1px dashed var(--bs-border);
+    font-size: var(--bs-text-sm);
+
+    &:last-child {
+      border-block-end: 0;
+    }
+  }
+
+  dt {
+    min-width: 7rem;
+    color: var(--bs-text-muted);
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 500;
+  }
+}
+
+.flags {
+  display: grid;
+  gap: var(--bs-space-2);
+}
+
+.flags__item {
+  padding: var(--bs-space-2) var(--bs-space-3);
+  border-inline-start: 3px solid var(--bs-warning);
+  background: var(--bs-accent-soft);
+  border-radius: var(--bs-radius-sm);
+  font-size: var(--bs-text-sm);
+}
+
+// --- Suggestions ----------------------------------------------------------
+
+.similar {
+  padding-block: var(--bs-space-7);
+}
+
+.similar__title {
+  margin: 0 0 var(--bs-space-5);
+  font-family: var(--bs-font-serif);
+  font-size: var(--bs-text-2xl);
+}
+
+.grid {
+  display: grid;
+  gap: var(--bs-space-4);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  @include m.from(t.$bs-bp-md) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @include m.from(t.$bs-bp-lg) {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}

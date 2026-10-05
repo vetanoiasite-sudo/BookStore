@@ -1,0 +1,132 @@
+<header class="bs-page-header">
+  <div>
+    <h1>{{ (queue() ? 'admin.books.queueTitle' : 'admin.books.title') | t }}</h1>
+    <p>
+      @if (state() === 'ready' && result(); as page) {
+        {{ 'admin.books.count' | t: { count: page.totalCount } }}
+      } @else {
+        {{ (queue() ? 'admin.books.queueLead' : 'admin.books.lead') | t }}
+      }
+    </p>
+  </div>
+
+  <div class="bs-page-header__actions">
+    @if (queue()) {
+      <a class="bs-button bs-button--ghost" routerLink="/admin/books/all">
+        {{ 'admin.nav.allBooks' | t }}
+      </a>
+    } @else {
+      <a class="bs-button bs-button--ghost" routerLink="/admin/books">
+        {{ 'admin.nav.review' | t }}
+      </a>
+    }
+  </div>
+</header>
+
+<div class="bs-toolbar">
+  @if (!queue()) {
+    <div class="bs-chips" role="group" [attr.aria-label]="'admin.books.filter.label' | t">
+      @for (filter of filters; track filter.value) {
+        <button
+          type="button"
+          class="bs-chip"
+          [class.bs-chip--active]="status() === filter.value"
+          [attr.aria-pressed]="status() === filter.value"
+          (click)="changeFilter(filter.value)"
+        >
+          {{ filter.labelKey | t }}
+        </button>
+      }
+    </div>
+  }
+
+  <form class="bs-search" (submit)="search($event)" role="search">
+    <label class="bs-visually-hidden" for="admin-search">{{ 'admin.books.search' | t }}</label>
+    <input
+      id="admin-search"
+      name="term"
+      class="bs-input"
+      type="search"
+      [value]="term()"
+      [attr.placeholder]="'admin.books.search' | t"
+    />
+    <button class="bs-button bs-button--ghost" type="submit">{{ 'search.submit' | t }}</button>
+  </form>
+</div>
+
+@switch (state()) {
+  @case ('loading') {
+    <div class="skeletons">
+      @for (placeholder of placeholders; track placeholder) {
+        <ui-skeleton height="3rem" />
+      }
+    </div>
+  }
+
+  @case ('error') {
+    <ui-error-state
+      title="admin.books.error.title"
+      text="admin.books.error.text"
+      (retry)="load()"
+    />
+  }
+
+  @default {
+    @if (isEmpty()) {
+      <ui-empty-state
+        [title]="queue() ? 'admin.books.queueEmpty.title' : 'admin.books.empty.title'"
+        [text]="queue() ? 'admin.books.queueEmpty.text' : 'admin.books.empty.text'"
+      />
+    } @else if (result(); as page) {
+      <div class="bs-table-scroll">
+        <table class="bs-table">
+          <thead>
+            <tr>
+              <th scope="col">{{ 'admin.books.column.book' | t }}</th>
+              <th scope="col">{{ 'admin.books.column.code' | t }}</th>
+              <th scope="col">{{ 'admin.books.column.seller' | t }}</th>
+              <th scope="col">{{ 'admin.books.column.price' | t }}</th>
+              <th scope="col">{{ 'admin.books.column.status' | t }}</th>
+              <th scope="col">{{ 'admin.books.column.location' | t }}</th>
+              <th scope="col"><span class="bs-visually-hidden">{{ 'common.actions' | t }}</span></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (book of page.items; track book.publicId) {
+              <tr>
+                <td>
+                  <a class="row__title" [routerLink]="['/admin/books', book.publicId]">
+                    {{ book.title }}
+                  </a>
+                  @if (book.authorName) {
+                    <span class="row__author">{{ book.authorName }}</span>
+                  }
+                </td>
+                <td class="row__code">{{ book.publicId }}</td>
+                <td>
+                  <span class="row__seller">{{ book.sellerDisplayName }}</span>
+                  <span class="row__code">{{ book.sellerPublicId }}</span>
+                </td>
+                <td>{{ book.price | price: book.currency }}</td>
+                <td><ui-status-badge [status]="book.status" /></td>
+                <td class="row__code">{{ book.locationCode ?? '—' }}</td>
+                <td class="row__actions">
+                  <a class="row__action" [routerLink]="['/admin/books', book.publicId]">
+                    {{ 'admin.books.open' | t }}
+                  </a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <ui-pagination
+        [page]="page.page"
+        [totalPages]="page.totalPages"
+        (pageChange)="changePage($event)"
+      />
+    }
+  }
+}

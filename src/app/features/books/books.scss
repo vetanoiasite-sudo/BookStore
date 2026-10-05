@@ -1,0 +1,145 @@
+@use 'mixins' as m;
+@use 'tokens' as t;
+
+.books {
+  padding-block: var(--bs-space-6) var(--bs-space-8);
+}
+
+.books__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--bs-space-4);
+  margin-block-end: var(--bs-space-5);
+  padding-block-end: var(--bs-space-4);
+  border-block-end: 1px solid var(--bs-border);
+}
+
+.books__title {
+  margin: 0;
+  font-family: var(--bs-font-serif);
+  font-size: var(--bs-text-2xl);
+}
+
+.books__count {
+  margin: var(--bs-space-1) 0 0;
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-sm);
+}
+
+.books__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--bs-space-3);
+}
+
+.books__clear {
+  border: 0;
+  background: none;
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-sm);
+  cursor: pointer;
+  text-decoration: underline;
+
+  &:hover {
+    color: var(--bs-primary);
+  }
+}
+
+.books__sort select {
+  padding: var(--bs-space-2) var(--bs-space-3);
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius-sm);
+  background: var(--bs-surface);
+  font-size: var(--bs-text-sm);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--bs-border-strong);
+  }
+}
+
+// The filter panel sits above the results until there is a screen wide enough to
+// put it beside them without squeezing the grid down to two columns.
+.books__layout {
+  display: grid;
+  gap: var(--bs-space-5);
+  align-items: start;
+
+  @include m.from(t.$bs-bp-lg) {
+    grid-template-columns: 16rem minmax(0, 1fr);
+  }
+}
+
+.books__filters {
+  @include m.from(t.$bs-bp-lg) {
+    position: sticky;
+
+    // Clear of the sticky site header, so scrolling a long list of authors does not
+    // push the panel underneath it.
+    top: var(--bs-space-5);
+  }
+}
+
+// The results column must be allowed to shrink, or a wide card would stretch the
+// grid track and push the panel off the side.
+.books__results {
+  min-width: 0;
+}
+
+// Two columns on a phone, three on a tablet, four on a wide screen. One fewer than
+// the full-width grid at each size, because the panel now takes a column of its own.
+.grid {
+  display: grid;
+  gap: var(--bs-space-4);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  @include m.from(t.$bs-bp-md) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @include m.from(t.$bs-bp-xl) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+// --- Breadcrumb -----------------------------------------------------------
+
+.breadcrumb {
+  margin-block-end: var(--bs-space-4);
+
+  ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--bs-space-2);
+    font-size: var(--bs-text-sm);
+    color: var(--bs-text-muted);
+  }
+
+  // The separator is drawn with a pseudo element so it never lands in the
+  // accessibility tree, and it points the way the text runs.
+  li + li::before {
+    content: '›';
+    margin-inline-end: var(--bs-space-2);
+    color: var(--bs-border-strong);
+  }
+
+  [dir='rtl'] & li + li::before {
+    content: '‹';
+  }
+
+  a {
+    color: var(--bs-text-muted);
+
+    &:hover {
+      color: var(--bs-primary);
+    }
+  }
+
+  [aria-current='page'] {
+    color: var(--bs-text);
+    font-weight: 600;
+  }
+}

@@ -1,0 +1,75 @@
+@use 'mixins' as m;
+@use 'tokens' as t;
+
+.addresses {
+  padding-block: var(--bs-space-6) var(--bs-space-8);
+}
+
+.form-card {
+  margin-block-end: var(--bs-space-5);
+}
+
+.list {
+  display: grid;
+  gap: var(--bs-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  grid-template-columns: 1fr;
+
+  @include m.from(t.$bs-bp-md) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.card {
+  display: grid;
+  align-content: start;
+  gap: var(--bs-space-1);
+}
+
+.card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bs-space-3);
+}
+
+.card__label {
+  margin: 0;
+  font-size: var(--bs-text-base);
+}
+
+.card__default {
+  padding: 0.1rem var(--bs-space-2);
+  border-radius: var(--bs-radius-pill);
+  background: var(--bs-primary-soft);
+  color: var(--bs-primary);
+  font-size: var(--bs-text-xs);
+  font-weight: 600;
+}
+
+.card__recipient {
+  margin: 0;
+  font-weight: 600;
+}
+
+.card__line,
+.card__phone,
+.card__notes {
+  margin: 0;
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-sm);
+}
+
+.card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bs-space-2);
+  margin-block-start: var(--bs-space-3);
+}
+
+.card__remove:hover:not(:disabled) {
+  border-color: var(--bs-danger);
+  color: var(--bs-danger);
+}

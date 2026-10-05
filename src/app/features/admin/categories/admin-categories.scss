@@ -1,0 +1,119 @@
+@use 'mixins' as m;
+@use 'tokens' as t;
+
+.skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bs-space-3);
+}
+
+.editor {
+  margin-block-end: var(--bs-space-5);
+  scroll-margin-block-start: var(--bs-space-6);
+}
+
+.editor__fields {
+  display: grid;
+  gap: var(--bs-space-3);
+  grid-template-columns: 1fr;
+
+  @include m.from(t.$bs-bp-md) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.editor__check {
+  align-self: end;
+  padding-block-end: var(--bs-space-2);
+}
+
+.editor__actions {
+  display: flex;
+  gap: var(--bs-space-2);
+  margin-block-start: var(--bs-space-4);
+}
+
+.tree {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+// Each level steps in from the reading edge and hangs off a guide line, so the
+// shape of the tree reads at a glance in either direction.
+.tree--nested {
+  margin-inline-start: var(--bs-space-4);
+  padding-inline-start: var(--bs-space-4);
+  border-inline-start: 2px solid var(--bs-border);
+}
+
+.node--root + .node--root {
+  margin-block-start: var(--bs-space-2);
+  padding-block-start: var(--bs-space-2);
+  border-block-start: 1px solid var(--bs-border);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bs-space-2) var(--bs-space-4);
+  padding-block: var(--bs-space-2);
+}
+
+.row--hidden .row__name {
+  opacity: 0.55;
+}
+
+.row__name {
+  display: flex;
+  flex: 1 1 12rem;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.row__title {
+  font-weight: 600;
+}
+
+.node--root > .row .row__title {
+  font-size: var(--bs-text-lg);
+}
+
+.row__other {
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-xs);
+}
+
+.row__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bs-space-2);
+}
+
+.count,
+.hidden-badge {
+  padding: 0.1rem var(--bs-space-2);
+  border-radius: var(--bs-radius-pill);
+  background: var(--bs-surface-muted);
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-xs);
+  white-space: nowrap;
+}
+
+.hidden-badge {
+  background: var(--bs-accent-soft);
+  color: var(--bs-accent);
+  font-weight: 600;
+}
+
+.row__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bs-space-2);
+}
+
+.small {
+  padding: 0.35em 0.9em;
+  font-size: var(--bs-text-xs);
+}

@@ -1,0 +1,224 @@
+<a class="bs-skip-link" href="#main">{{ 'app.skipToContent' | t }}</a>
+
+<header class="header">
+  <div class="bs-container header__bar">
+    <a class="brand" routerLink="/" (click)="closeMenu()">
+      <span class="brand__mark" aria-hidden="true">
+        <img src="logo.svg" alt="" width="40" height="40" />
+      </span>
+      <span class="brand__name">{{ 'app.name' | t }}</span>
+    </a>
+
+    <form class="search search--desktop" (submit)="submitSearch($event)" role="search">
+      <label class="bs-visually-hidden" for="header-search">{{ 'search.placeholder' | t }}</label>
+      <input
+        id="header-search"
+        class="search__input"
+        type="search"
+        [value]="searchTerm()"
+        (input)="updateSearch($event)"
+        [attr.placeholder]="'search.placeholder' | t"
+      />
+      <button class="search__button" type="submit" [attr.aria-label]="'search.submit' | t">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-3.5-3.5" stroke-linecap="round" />
+        </svg>
+      </button>
+    </form>
+
+    <div class="header__actions">
+      @if (auth.isMember()) {
+        <a
+          class="header__icon"
+          routerLink="/favorites"
+          routerLinkActive="header__icon--active"
+          [attr.aria-label]="'nav.saved' | t"
+          [attr.title]="'nav.saved' | t"
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path
+              d="M12 20.5 4.6 13.3a4.7 4.7 0 0 1 0-6.6 4.5 4.5 0 0 1 6.5 0l.9.9.9-.9a4.5 4.5 0 0 1 6.5 0 4.7 4.7 0 0 1 0 6.6z"
+              stroke-linejoin="round"
+            />
+          </svg>
+
+          @if (favorites.count(); as saved) {
+            <span class="header__badge">{{ saved }}</span>
+          }
+        </a>
+
+        <a
+          class="header__icon"
+          routerLink="/cart"
+          routerLinkActive="header__icon--active"
+          [attr.aria-label]="'nav.cart' | t"
+          [attr.title]="'nav.cart' | t"
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M3 4h2.2l2.1 10.4a2 2 0 0 0 2 1.6h7.5a2 2 0 0 0 2-1.5L20.5 7H6" stroke-linecap="round" />
+            <circle cx="10" cy="20" r="1.4" />
+            <circle cx="17" cy="20" r="1.4" />
+          </svg>
+
+          @if (cart.count(); as items) {
+            <span class="header__badge">{{ items }}</span>
+          }
+        </a>
+      }
+
+      @if (auth.isAuthenticated()) {
+        @if (auth.isMember()) {
+          <a class="header__workspace" routerLink="/orders">{{ 'nav.orders' | t }}</a>
+        }
+
+        @if (workspace(); as target) {
+          <a class="header__workspace" [routerLink]="target">{{ 'nav.workspace' | t }}</a>
+        }
+
+        <button type="button" class="header__signout" (click)="signOut()">
+          {{ 'auth.signOut' | t }}
+        </button>
+      } @else {
+        <a class="header__signin" routerLink="/auth/login">{{ 'nav.signIn' | t }}</a>
+      }
+
+      <button
+        type="button"
+        class="header__language"
+        (click)="switchLanguage()"
+        [attr.aria-label]="'nav.languageLabel' | t"
+      >
+        {{ 'nav.language' | t }}
+      </button>
+
+      <button
+        type="button"
+        class="header__toggle"
+        (click)="toggleMenu()"
+        [attr.aria-expanded]="menuOpen()"
+        aria-controls="primary-navigation"
+        [attr.aria-label]="(menuOpen() ? 'nav.closeMenu' : 'nav.openMenu') | t"
+      >
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          @if (menuOpen()) {
+            <path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" />
+          } @else {
+            <path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" />
+          }
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <nav id="primary-navigation" class="nav" [class.nav--open]="menuOpen()">
+    <div class="bs-container nav__inner">
+      <form class="search search--mobile" (submit)="submitSearch($event)" role="search">
+        <label class="bs-visually-hidden" for="drawer-search">{{ 'search.placeholder' | t }}</label>
+        <input
+          id="drawer-search"
+          class="search__input"
+          type="search"
+          [value]="searchTerm()"
+          (input)="updateSearch($event)"
+          [attr.placeholder]="'search.placeholder' | t"
+        />
+        <button class="search__button" type="submit">{{ 'search.submit' | t }}</button>
+      </form>
+
+      <ul class="nav__list">
+        <li>
+          <a routerLink="/" routerLinkActive="nav__link--active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">
+            {{ 'nav.home' | t }}
+          </a>
+        </li>
+        <li>
+          <a routerLink="/books" routerLinkActive="nav__link--active" (click)="closeMenu()">
+            {{ 'nav.books' | t }}
+          </a>
+        </li>
+        <li>
+          <a routerLink="/categories" routerLinkActive="nav__link--active" (click)="closeMenu()">
+            {{ 'nav.categories' | t }}
+          </a>
+        </li>
+        <li>
+          <a routerLink="/how-it-works" routerLinkActive="nav__link--active" (click)="closeMenu()">
+            {{ 'nav.howItWorks' | t }}
+          </a>
+        </li>
+
+        @if (auth.isMember()) {
+          <li>
+            <a routerLink="/cart" routerLinkActive="nav__link--active" (click)="closeMenu()">
+              {{ 'nav.cart' | t }} ({{ cart.count() }})
+            </a>
+          </li>
+          <li>
+            <a routerLink="/favorites" routerLinkActive="nav__link--active" (click)="closeMenu()">
+              {{ 'nav.saved' | t }} ({{ favorites.count() }})
+            </a>
+          </li>
+          <li>
+            <a routerLink="/orders" routerLinkActive="nav__link--active" (click)="closeMenu()">
+              {{ 'nav.orders' | t }}
+            </a>
+          </li>
+          <li>
+            <a routerLink="/addresses" routerLinkActive="nav__link--active" (click)="closeMenu()">
+              {{ 'nav.addresses' | t }}
+            </a>
+          </li>
+        }
+      </ul>
+
+      <a class="nav__sell" routerLink="/seller/books/new" (click)="closeMenu()">{{ 'nav.sellYourBook' | t }}</a>
+
+      @if (auth.isAuthenticated()) {
+        <button type="button" class="nav__signout" (click)="signOut()">
+          {{ 'auth.signOut' | t }}
+        </button>
+      } @else {
+        <a class="nav__signin" routerLink="/auth/login" (click)="closeMenu()">
+          {{ 'nav.signIn' | t }}
+        </a>
+      }
+    </div>
+  </nav>
+</header>
+
+<main id="main" class="main">
+  <router-outlet />
+</main>
+
+<footer class="footer">
+  <div class="bs-container footer__inner">
+    <section class="footer__block">
+      <h2 class="footer__title">{{ 'footer.about.title' | t }}</h2>
+      <p class="footer__text">{{ 'footer.about.text' | t }}</p>
+    </section>
+
+    <section class="footer__block">
+      <h2 class="footer__title">{{ 'footer.links.title' | t }}</h2>
+      <ul class="footer__list">
+        <li><a routerLink="/books">{{ 'nav.books' | t }}</a></li>
+        <li><a routerLink="/categories">{{ 'nav.categories' | t }}</a></li>
+        <li><a routerLink="/seller/books/new">{{ 'nav.sellYourBook' | t }}</a></li>
+      </ul>
+    </section>
+
+    <section class="footer__block">
+      <h2 class="footer__title">{{ 'footer.help.title' | t }}</h2>
+      <ul class="footer__list">
+        <li><a routerLink="/how-it-works">{{ 'footer.help.howItWorks' | t }}</a></li>
+        <li><a routerLink="/support">{{ 'footer.help.support' | t }}</a></li>
+      </ul>
+    </section>
+  </div>
+
+  <p class="footer__rights">
+    © {{ currentYear }} {{ 'app.name' | t }}. {{ 'footer.rights' | t }}
+  </p>
+</footer>
+
+<ui-toast-host />

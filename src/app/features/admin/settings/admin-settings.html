@@ -1,0 +1,57 @@
+<header class="bs-page-header">
+  <div>
+    <h1>{{ 'admin.settings.title' | t }}</h1>
+    <p>{{ 'admin.settings.lead' | t }}</p>
+  </div>
+</header>
+
+@switch (state()) {
+  @case ('loading') {
+    <div class="skeletons" aria-hidden="true">
+      @for (placeholder of placeholders; track placeholder) {
+        <ui-skeleton height="2.5rem" />
+      }
+    </div>
+  }
+
+  @case ('error') {
+    <ui-error-state
+      title="admin.settings.error.title"
+      text="admin.settings.error.text"
+      (retry)="load()"
+    />
+  }
+
+  @default {
+    <section class="bs-card">
+      <div class="bs-table-scroll">
+        <table class="bs-table">
+          <thead>
+            <tr>
+              <th scope="col">{{ 'admin.settings.column.setting' | t }}</th>
+              <th scope="col">{{ 'admin.settings.column.value' | t }}</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (setting of settings(); track setting.key) {
+              <tr>
+                <td>
+                  <span class="key">{{ setting.key }}</span>
+                  <span class="description">{{ setting.description }}</span>
+                </td>
+                <td><span class="value">{{ setting.value }}</span></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!--
+      Why there is nothing to edit here. Saying it beats a form that pretends to
+      save and then disagrees with the environment the API is running in.
+    -->
+    <p class="bs-muted note">{{ 'admin.settings.note' | t }}</p>
+  }
+}

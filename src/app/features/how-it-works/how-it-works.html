@@ -1,0 +1,91 @@
+<section class="how">
+  <div class="bs-container">
+    <header class="how__header">
+      <h1 class="how__title">{{ 'nav.howItWorks' | t }}</h1>
+      <p class="how__lead">{{ 'howItWorks.lead' | t }}</p>
+
+      @if (page(); as content) {
+        <nav class="how__jump" [attr.aria-label]="'howItWorks.jump' | t">
+          @for (journey of content.journeys; track journey.key) {
+            <a class="how__jump-link" [href]="'#' + journey.key">
+              {{ pick(journey.titleAr, journey.titleEn) }}
+            </a>
+          }
+          <a class="how__jump-link" href="#questions">{{ 'howItWorks.questions' | t }}</a>
+        </nav>
+      }
+    </header>
+
+    @switch (state()) {
+      @case ('loading') {
+        <div class="how__loading" aria-hidden="true">
+          @for (placeholder of placeholders; track placeholder) {
+            <ui-skeleton width="70%" height="1.2rem" />
+            <ui-skeleton width="95%" height="0.9rem" />
+          }
+        </div>
+      }
+
+      @case ('error') {
+        <ui-error-state title="howItWorks.error.title" text="books.error.text" (retry)="load()" />
+      }
+
+      @default {
+        @if (page(); as content) {
+          @for (journey of content.journeys; track journey.key) {
+            <section class="journey" [id]="journey.key">
+              <div class="journey__head">
+                <h2 class="journey__title">{{ pick(journey.titleAr, journey.titleEn) }}</h2>
+                <p class="journey__intro">{{ pick(journey.introAr, journey.introEn) }}</p>
+              </div>
+
+              <ol class="steps">
+                @for (step of journey.steps; track $index) {
+                  <li class="step">
+                    <span class="step__number" aria-hidden="true">{{ $index + 1 }}</span>
+                    <div>
+                      <h3 class="step__title">{{ pick(step.titleAr, step.titleEn) }}</h3>
+                      <p class="step__text">{{ pick(step.textAr, step.textEn) }}</p>
+                    </div>
+                  </li>
+                }
+              </ol>
+
+              @if (journey.key === 'sell') {
+                <a class="journey__action" routerLink="/seller/books/new">
+                  {{ 'nav.sellYourBook' | t }}
+                </a>
+              } @else {
+                <a class="journey__action" routerLink="/books">
+                  {{ 'howItWorks.browse' | t }}
+                </a>
+              }
+            </section>
+          }
+
+          <section class="rules">
+            <h2 class="how__section-title">{{ 'howItWorks.rules' | t }}</h2>
+            <div class="rules__grid">
+              @for (rule of content.rules; track $index) {
+                <article class="rule">
+                  <h3 class="rule__title">{{ pick(rule.titleAr, rule.titleEn) }}</h3>
+                  <p class="rule__text">{{ pick(rule.textAr, rule.textEn) }}</p>
+                </article>
+              }
+            </div>
+          </section>
+
+          <section class="questions" id="questions">
+            <h2 class="how__section-title">{{ 'howItWorks.questions' | t }}</h2>
+            @for (question of content.questions; track $index) {
+              <details class="question">
+                <summary class="question__title">{{ pick(question.titleAr, question.titleEn) }}</summary>
+                <p class="question__text">{{ pick(question.textAr, question.textEn) }}</p>
+              </details>
+            }
+          </section>
+        }
+      }
+    }
+  </div>
+</section>

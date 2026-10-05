@@ -1,0 +1,140 @@
+<section class="books">
+  <div class="bs-container">
+    @if (category(); as active) {
+      <nav class="breadcrumb" [attr.aria-label]="'nav.categories' | t">
+        <ol>
+          <li><a routerLink="/categories">{{ 'nav.categories' | t }}</a></li>
+          @for (ancestor of active.ancestors; track ancestor.slug) {
+            <li>
+              <a [routerLink]="['/books']" [queryParams]="{ category: ancestor.slug }">
+                {{ ancestor.nameAr | categoryName: ancestor.nameEn }}
+              </a>
+            </li>
+          }
+          <li aria-current="page">{{ active.nameAr | categoryName: active.nameEn }}</li>
+        </ol>
+      </nav>
+    }
+
+    <header class="books__header">
+      <div>
+        <h1 class="books__title">
+          @if (category(); as active) {
+            {{ active.nameAr | categoryName: active.nameEn }}
+          } @else if (term()) {
+            {{ 'search.resultsFor' | t: { term: term() } }}
+          } @else {
+            {{ 'books.title' | t }}
+          }
+        </h1>
+
+        @if (state() === 'ready') {
+          <p class="books__count">
+            @switch (totalCount()) {
+              @case (0) {
+                {{ 'books.countNone' | t }}
+              }
+              @case (1) {
+                {{ 'books.countOne' | t }}
+              }
+              @default {
+                {{ 'books.count' | t: { count: totalCount() } }}
+              }
+            }
+          </p>
+        }
+      </div>
+
+      <div class="books__controls">
+        @if (categorySlug()) {
+          <button type="button" class="books__clear" (click)="clearCategory()">
+            {{ 'books.clearCategory' | t }}
+          </button>
+        }
+
+        @if (term()) {
+          <button type="button" class="books__clear" (click)="clearSearch()">
+            {{ 'search.clear' | t }}
+          </button>
+        }
+
+        <label class="books__sort">
+          <span class="bs-visually-hidden">{{ 'books.sort.label' | t }}</span>
+          <select [value]="sort()" (change)="changeSort($event)">
+            @for (option of sortOptions; track option.value) {
+              <option [value]="option.value">{{ option.labelKey | t }}</option>
+            }
+          </select>
+        </label>
+      </div>
+    </header>
+
+    <div class="books__layout">
+      <aside class="books__filters">
+        <book-filters
+          [options]="filterOptions()"
+          [selection]="selection()"
+          (changed)="applyFilters($event)"
+          (cleared)="clearFilters()"
+        />
+      </aside>
+
+      <div class="books__results">
+        @switch (state()) {
+          @case ('loading') {
+            <div class="grid">
+              @for (placeholder of placeholders; track placeholder) {
+                <book-card-skeleton />
+              }
+            </div>
+          }
+
+          @case ('error') {
+            <ui-error-state
+              title="books.error.title"
+              text="books.error.text"
+              (retry)="load()"
+            />
+          }
+
+          @default {
+            @if (isEmpty()) {
+              <!--
+                A reader who has narrowed the catalogue to nothing needs the filters
+                dropped, not the whole page; one who is looking at an empty shop needs
+                somewhere else to go.
+              -->
+              @if (isFiltered()) {
+                <ui-empty-state
+                  title="books.empty.title"
+                  text="books.empty.filtered"
+                  actionLabel="filters.clearAll"
+                  (action)="clearSearch()"
+                />
+              } @else {
+                <ui-empty-state
+                  title="books.empty.title"
+                  text="books.empty.text"
+                  actionLabel="books.empty.action"
+                  (action)="clearSearch()"
+                />
+              }
+            } @else if (result(); as page) {
+              <div class="grid">
+                @for (book of page.items; track book.publicId) {
+                  <book-card [book]="book" />
+                }
+              </div>
+
+              <ui-pagination
+                [page]="page.page"
+                [totalPages]="page.totalPages"
+                (pageChange)="changePage($event)"
+              />
+            }
+          }
+        }
+      </div>
+    </div>
+  </div>
+</section>

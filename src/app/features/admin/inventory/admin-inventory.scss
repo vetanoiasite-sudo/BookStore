@@ -1,0 +1,102 @@
+@use 'mixins' as m;
+@use 'tokens' as t;
+
+.skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bs-space-2);
+}
+
+.shelves {
+  margin-block-end: var(--bs-space-5);
+}
+
+.shelf-form {
+  margin-block-end: var(--bs-space-4);
+}
+
+.shelf-form__fields {
+  display: grid;
+  gap: var(--bs-space-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  @include m.from(t.$bs-bp-md) {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+.shelf-form__actions {
+  display: flex;
+  gap: var(--bs-space-2);
+  margin-block-start: var(--bs-space-3);
+}
+
+// The shelf code is what a person reads off a label, so it is set in a way that
+// survives being glanced at.
+.location {
+  display: inline-block;
+  padding: 0.1rem var(--bs-space-2);
+  border-radius: var(--bs-radius-sm);
+  background: var(--bs-accent-soft);
+  color: var(--bs-accent);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.book {
+  display: block;
+  font-weight: 600;
+  color: var(--bs-text);
+
+  &:hover {
+    color: var(--bs-primary);
+    text-decoration: none;
+  }
+}
+
+.code {
+  display: block;
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-xs);
+}
+
+.closed {
+  opacity: 0.6;
+}
+
+.move {
+  margin-block-start: var(--bs-space-1);
+  max-width: 10rem;
+  font-size: var(--bs-text-xs);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bs-space-2);
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+// The history unfolds under the row it belongs to rather than in a dialog, so the
+// copy it describes stays on screen beside it.
+.history td {
+  background: var(--bs-surface-muted);
+}
+
+.moves {
+  display: grid;
+  gap: var(--bs-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.moves__where {
+  display: block;
+  font-weight: 600;
+  font-size: var(--bs-text-sm);
+}

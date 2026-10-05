@@ -1,0 +1,41 @@
+.not-found {
+  display: grid;
+  place-items: center;
+  min-height: 70vh;
+  padding-block: var(--bs-space-8);
+}
+
+.not-found__inner {
+  text-align: center;
+}
+
+.not-found__code {
+  margin: 0;
+  color: var(--bs-border-strong);
+  font-family: var(--bs-font-serif);
+  font-size: 4rem;
+  line-height: 1;
+}
+
+.not-found__title {
+  margin-block-start: var(--bs-space-3);
+}
+
+.not-found__text {
+  color: var(--bs-text-muted);
+}
+
+.not-found__link {
+  display: inline-block;
+  padding: var(--bs-space-3) var(--bs-space-5);
+  border-radius: var(--bs-radius-pill);
+  background: var(--bs-primary);
+  color: var(--bs-text-inverse);
+  font-weight: 600;
+
+  &:hover {
+    background: var(--bs-primary-hover);
+    color: var(--bs-text-inverse);
+    text-decoration: none;
+  }
+}

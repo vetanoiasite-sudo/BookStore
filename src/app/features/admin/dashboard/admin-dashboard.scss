@@ -1,0 +1,116 @@
+@use 'mixins' as m;
+@use 'tokens' as t;
+
+.section {
+  margin-block-end: var(--bs-space-6);
+}
+
+.section__title {
+  margin: 0 0 var(--bs-space-3);
+  font-size: var(--bs-text-base);
+  color: var(--bs-text-muted);
+}
+
+.stats {
+  display: grid;
+  gap: var(--bs-space-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  @include m.from(t.$bs-bp-md) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @include m.from(t.$bs-bp-xl) {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.charts {
+  display: grid;
+  gap: var(--bs-space-3);
+  margin-block-start: var(--bs-space-3);
+  grid-template-columns: 1fr;
+
+  @include m.from(t.$bs-bp-md) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.columns {
+  display: grid;
+  gap: var(--bs-space-4);
+  margin-block-end: var(--bs-space-6);
+  align-items: start;
+  grid-template-columns: 1fr;
+
+  @include m.from(t.$bs-bp-lg) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.list {
+  display: grid;
+  gap: var(--bs-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.list__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bs-space-3);
+  padding-block: var(--bs-space-2);
+  border-block-end: 1px solid var(--bs-border);
+
+  &:last-child {
+    border-block-end: 0;
+  }
+}
+
+.list__main {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+  color: inherit;
+
+  &:hover {
+    color: var(--bs-primary);
+    text-decoration: none;
+  }
+}
+
+.list__title {
+  font-weight: 600;
+  @include m.line-clamp(1);
+}
+
+.list__meta,
+.list__date {
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-xs);
+}
+
+.list__side {
+  display: grid;
+  justify-items: end;
+  gap: 0.15rem;
+  white-space: nowrap;
+}
+
+.list__status {
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-xs);
+}
+
+.list__total {
+  font-weight: 700;
+  font-size: var(--bs-text-sm);
+}
+
+.empty {
+  margin: 0;
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-sm);
+}

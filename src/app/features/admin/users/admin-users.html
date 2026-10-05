@@ -1,0 +1,143 @@
+<header class="bs-page-header">
+  <div>
+    <h1>{{ 'admin.users.title' | t }}</h1>
+    <p>
+      @if (state() === 'ready' && result(); as page) {
+        {{ 'admin.users.count' | t: { count: page.totalCount } }}
+      } @else {
+        {{ 'admin.users.lead' | t }}
+      }
+    </p>
+  </div>
+</header>
+
+<div class="bs-toolbar">
+  <div class="bs-chips" role="group" [attr.aria-label]="'admin.users.filter' | t">
+    @for (entry of roles; track entry.value) {
+      <button
+        type="button"
+        class="bs-chip"
+        [class.bs-chip--active]="role() === entry.value"
+        [attr.aria-pressed]="role() === entry.value"
+        (click)="changeRole(entry.value)"
+      >
+        {{ entry.labelKey | t }}
+      </button>
+    }
+  </div>
+
+  <form class="bs-search" (submit)="search($event)" role="search">
+    <label class="bs-visually-hidden" for="user-search">{{ 'admin.users.search' | t }}</label>
+    <input
+      id="user-search"
+      name="term"
+      class="bs-input"
+      type="search"
+      [value]="term()"
+      [attr.placeholder]="'admin.users.search' | t"
+    />
+    <button class="bs-button bs-button--ghost" type="submit">{{ 'search.submit' | t }}</button>
+  </form>
+</div>
+
+@switch (state()) {
+  @case ('loading') {
+    <div class="skeletons" aria-hidden="true">
+      @for (placeholder of placeholders; track placeholder) {
+        <ui-skeleton height="2.5rem" />
+      }
+    </div>
+  }
+
+  @case ('error') {
+    <ui-error-state
+      title="admin.users.error.title"
+      text="admin.users.error.text"
+      (retry)="load()"
+    />
+  }
+
+  @default {
+    @if (isEmpty()) {
+      <ui-empty-state title="admin.users.empty.title" text="admin.users.empty.text" />
+    } @else if (result(); as page) {
+      <div class="bs-table-scroll">
+        <table class="bs-table">
+          <thead>
+            <tr>
+              <th scope="col">{{ 'admin.users.column.person' | t }}</th>
+              <th scope="col">{{ 'admin.users.column.roles' | t }}</th>
+              <th scope="col">{{ 'admin.users.column.orders' | t }}</th>
+              <th scope="col">{{ 'admin.users.column.joined' | t }}</th>
+              <th scope="col">{{ 'admin.users.column.lastSeen' | t }}</th>
+              <th scope="col">{{ 'common.actions' | t }}</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (user of page.items; track user.id) {
+              <tr [class.closed]="!user.isActive">
+                <td>
+                  <span class="person">{{ user.displayName }}</span>
+                  <span class="code">{{ user.email }}</span>
+                  <span class="code">{{ user.publicId }}</span>
+
+                  @if (!user.emailConfirmed) {
+                    <span class="flag">{{ 'admin.users.unconfirmed' | t }}</span>
+                  }
+                  @if (!user.isActive) {
+                    <span class="flag flag--off">{{ 'admin.users.closed' | t }}</span>
+                  }
+                </td>
+
+                <td>
+                  <span class="roles">
+                    @for (name of user.roles; track name) {
+                      <span class="role">{{ name }}</span>
+                    }
+                  </span>
+
+                  @if (user.sellerPublicId) {
+                    <span class="code">{{ user.sellerPublicId }}</span>
+                  }
+                </td>
+
+                <td>{{ user.orderCount }}</td>
+                <td class="nowrap">{{ user.createdAt | date: 'shortDate' }}</td>
+                <td class="nowrap">
+                  @if (user.lastLoginAt) {
+                    {{ user.lastLoginAt | date: 'short' }}
+                  } @else {
+                    <span class="code">{{ 'admin.users.never' | t }}</span>
+                  }
+                </td>
+
+                <td>
+                  <!-- Only an administrator may close an account, and never their own -->
+                  @if (auth.isAdmin() && user.publicId !== auth.user()?.publicId) {
+                    <button
+                      type="button"
+                      class="bs-button bs-button--ghost"
+                      [disabled]="busy() === user.id"
+                      (click)="toggleActive(user)"
+                    >
+                      {{ (user.isActive ? 'admin.users.close' : 'admin.users.reopen') | t }}
+                    </button>
+                  } @else {
+                    <span class="code">—</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <ui-pagination
+        [page]="page.page"
+        [totalPages]="page.totalPages"
+        (pageChange)="goToPage($event)"
+      />
+    }
+  }
+}

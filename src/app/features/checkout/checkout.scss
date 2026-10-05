@@ -1,0 +1,227 @@
+@use 'mixins' as m;
+@use 'tokens' as t;
+
+.checkout {
+  padding-block: var(--bs-space-6) var(--bs-space-8);
+}
+
+.layout {
+  display: grid;
+  gap: var(--bs-space-5);
+  align-items: start;
+  grid-template-columns: 1fr;
+
+  @include m.from(t.$bs-bp-lg) {
+    grid-template-columns: minmax(0, 1fr) 20rem;
+  }
+}
+
+.column {
+  display: grid;
+  gap: var(--bs-space-5);
+}
+
+.empty {
+  display: grid;
+  justify-items: start;
+  gap: var(--bs-space-3);
+}
+
+.hint {
+  margin: 0 0 var(--bs-space-3);
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-sm);
+}
+
+// --- Choosing an address ---------------------------------------------------
+
+.choices {
+  display: grid;
+  gap: var(--bs-space-3);
+  margin: 0 0 var(--bs-space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.choice {
+  display: flex;
+  gap: var(--bs-space-3);
+  padding: var(--bs-space-4);
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius-md);
+  cursor: pointer;
+
+  input {
+    margin-block-start: 0.2rem;
+    accent-color: var(--bs-primary);
+  }
+
+  &:hover {
+    border-color: var(--bs-primary);
+  }
+}
+
+.choice--on {
+  border-color: var(--bs-primary);
+  background: var(--bs-primary-soft);
+}
+
+.choice__body {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.choice__label {
+  display: flex;
+  align-items: center;
+  gap: var(--bs-space-2);
+  font-weight: 600;
+}
+
+.choice__default {
+  padding: 0.1rem var(--bs-space-2);
+  border-radius: var(--bs-radius-pill);
+  background: var(--bs-surface);
+  color: var(--bs-primary);
+  font-size: var(--bs-text-xs);
+}
+
+.choice__recipient {
+  font-size: var(--bs-text-sm);
+}
+
+.choice__line,
+.choice__phone {
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-sm);
+}
+
+.new-address {
+  margin-block-start: var(--bs-space-4);
+  padding-block-start: var(--bs-space-4);
+  border-block-start: 1px solid var(--bs-border);
+}
+
+.new-address__title {
+  margin: 0 0 var(--bs-space-3);
+  font-size: var(--bs-text-base);
+}
+
+// --- What is being bought --------------------------------------------------
+
+.lines {
+  display: grid;
+  gap: var(--bs-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.line {
+  display: grid;
+  gap: var(--bs-space-3);
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.line--gone {
+  opacity: 0.7;
+}
+
+.line__cover {
+  width: 48px;
+  height: 70px;
+  border-radius: var(--bs-radius-sm);
+  object-fit: cover;
+}
+
+.line__body {
+  min-width: 0;
+}
+
+.line__title {
+  margin: 0;
+  font-weight: 600;
+}
+
+.line__author {
+  margin: 0;
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-sm);
+}
+
+.line__gone {
+  margin: var(--bs-space-1) 0 0;
+  color: var(--bs-danger);
+  font-size: var(--bs-text-sm);
+  font-weight: 600;
+}
+
+.line__price {
+  margin: 0;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.blocked {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bs-space-2);
+  margin: var(--bs-space-4) 0 0;
+  padding: var(--bs-space-3) var(--bs-space-4);
+  border-inline-start: 4px solid var(--bs-danger);
+  color: var(--bs-danger);
+  font-size: var(--bs-text-sm);
+}
+
+// --- The total -------------------------------------------------------------
+
+.summary {
+  display: grid;
+  gap: var(--bs-space-3);
+
+  @include m.from(t.$bs-bp-lg) {
+    position: sticky;
+    inset-block-start: var(--bs-space-5);
+  }
+}
+
+.summary__rows {
+  display: grid;
+  gap: var(--bs-space-2);
+  margin: 0;
+}
+
+.summary__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--bs-space-3);
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-sm);
+
+  dt,
+  dd {
+    margin: 0;
+  }
+}
+
+.summary__row--total {
+  padding-block-start: var(--bs-space-2);
+  border-block-start: 1px solid var(--bs-border);
+  color: var(--bs-text);
+  font-size: var(--bs-text-base);
+  font-weight: 700;
+}
+
+.summary__note {
+  margin: 0;
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-xs);
+}
+
+.summary__back {
+  color: var(--bs-primary);
+  font-size: var(--bs-text-sm);
+  text-align: center;
+}

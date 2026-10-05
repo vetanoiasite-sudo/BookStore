@@ -1,0 +1,107 @@
+<header class="bs-page-header">
+  <div>
+    <h1>{{ 'admin.audit.title' | t }}</h1>
+    <p>
+      @if (state() === 'ready' && result(); as page) {
+        {{ 'admin.audit.count' | t: { count: page.totalCount } }}
+      } @else {
+        {{ 'admin.audit.lead' | t }}
+      }
+    </p>
+  </div>
+</header>
+
+<div class="bs-toolbar">
+  <div class="bs-chips" role="group" [attr.aria-label]="'admin.audit.filter' | t">
+    @for (entry of actions; track entry.value) {
+      <button
+        type="button"
+        class="bs-chip"
+        [class.bs-chip--active]="action() === entry.value"
+        [attr.aria-pressed]="action() === entry.value"
+        (click)="changeAction(entry.value)"
+      >
+        {{ entry.labelKey | t }}
+      </button>
+    }
+  </div>
+
+  <div class="bs-search">
+    <label class="bs-visually-hidden" for="audit-entity">{{ 'admin.audit.entity' | t }}</label>
+    <select id="audit-entity" class="bs-select" [value]="entity()" (change)="changeEntity($event)">
+      <option value="">{{ 'admin.audit.allEntities' | t }}</option>
+      @for (name of entities(); track name) {
+        <option [value]="name">{{ name }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+@switch (state()) {
+  @case ('loading') {
+    <div class="skeletons" aria-hidden="true">
+      @for (placeholder of placeholders; track placeholder) {
+        <ui-skeleton height="2.2rem" />
+      }
+    </div>
+  }
+
+  @case ('error') {
+    <ui-error-state
+      title="admin.audit.error.title"
+      text="admin.audit.error.text"
+      (retry)="load()"
+    />
+  }
+
+  @default {
+    @if (isEmpty()) {
+      <ui-empty-state title="admin.audit.empty.title" text="admin.audit.empty.text" />
+    } @else if (result(); as page) {
+      <div class="bs-table-scroll">
+        <table class="bs-table">
+          <thead>
+            <tr>
+              <th scope="col">{{ 'admin.audit.column.when' | t }}</th>
+              <th scope="col">{{ 'admin.audit.column.who' | t }}</th>
+              <th scope="col">{{ 'admin.audit.column.what' | t }}</th>
+              <th scope="col">{{ 'admin.audit.column.which' | t }}</th>
+              <th scope="col">{{ 'admin.audit.column.from' | t }}</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (entry of page.items; track entry.id) {
+              <tr>
+                <td class="nowrap">{{ entry.at | date: 'short' }}</td>
+                <td>
+                  <span class="actor">{{ entry.actor }}</span>
+                  @if (entry.actorPublicId) {
+                    <span class="code">{{ entry.actorPublicId }}</span>
+                  }
+                </td>
+                <td>
+                  <span class="action">{{ 'admin.audit.action.' + entry.action | t }}</span>
+                  @if (entry.description) {
+                    <span class="code">{{ entry.description }}</span>
+                  }
+                </td>
+                <td>
+                  <span class="entity">{{ entry.entityName }}</span>
+                  <span class="code">{{ entry.entityId }}</span>
+                </td>
+                <td class="code">{{ entry.ipAddress ?? '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <ui-pagination
+        [page]="page.page"
+        [totalPages]="page.totalPages"
+        (pageChange)="goToPage($event)"
+      />
+    }
+  }
+}

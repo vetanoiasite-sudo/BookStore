@@ -1,0 +1,354 @@
+@switch (state()) {
+  @case ('loading') {
+    <ui-skeleton height="2.5rem" />
+    <div class="skeletons">
+      @for (placeholder of [1, 2, 3, 4, 5, 6]; track placeholder) {
+        <ui-skeleton height="3rem" />
+      }
+    </div>
+  }
+
+  @case ('error') {
+    <ui-error-state
+      title="seller.form.error.title"
+      text="seller.form.error.text"
+      (retry)="load()"
+    />
+  }
+
+  @default {
+    <header class="bs-page-header">
+      <div>
+        <h1>{{ (isNew() ? 'seller.form.newTitle' : 'seller.form.editTitle') | t }}</h1>
+        @if (book(); as current) {
+          <p>
+            {{ current.publicId }}
+            @if (current.viewCount > 0) {
+              &middot; {{ 'seller.form.views' | t: { count: current.viewCount } }}
+            }
+          </p>
+        } @else {
+          <p>{{ 'seller.form.newLead' | t }}</p>
+        }
+      </div>
+
+      <div class="bs-page-header__actions">
+        @if (book(); as current) {
+          <ui-status-badge [status]="current.status" />
+        }
+        <a class="bs-button bs-button--ghost" routerLink="/seller/books">
+          {{ 'common.back' | t }}
+        </a>
+      </div>
+    </header>
+
+    @if (book(); as current) {
+      @if (current.status === 'rejected' && current.rejectionReason) {
+        <div class="notice notice--danger" role="alert">
+          <strong>{{ 'seller.form.rejected' | t }}</strong>
+          <p>{{ current.rejectionReason }}</p>
+        </div>
+      } @else if (!current.isEditable) {
+        <p class="notice">{{ 'seller.form.locked' | t }}</p>
+      }
+    }
+
+    <div class="layout">
+      <form class="bs-card bs-form" [formGroup]="form" (ngSubmit)="save()" novalidate>
+        <h2 class="bs-card__title">{{ 'seller.form.section.book' | t }}</h2>
+
+        @if (editable()) {
+          <div class="assist">
+            <label class="bs-button bs-button--ghost assist__button">
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                [disabled]="recognising()"
+                (change)="recognise($event)"
+              />
+              {{ (recognising() ? 'seller.form.recognising' : 'seller.form.recognise') | t }}
+            </label>
+            <p class="bs-hint">{{ 'seller.form.recognise.hint' | t }}</p>
+          </div>
+        }
+
+        <div class="bs-field">
+          <label class="bs-label" for="title">{{ 'seller.form.field.title' | t }}</label>
+          <input id="title" class="bs-input" type="text" formControlName="title" />
+          @if (errorFor('title'); as message) {
+            <p class="bs-error">{{ message }}</p>
+          } @else if (form.controls.title.touched && form.controls.title.invalid) {
+            <p class="bs-error">{{ 'seller.form.error.titleRequired' | t }}</p>
+          }
+        </div>
+
+        <div class="grid-2">
+          <div class="bs-field">
+            <label class="bs-label" for="category">{{ 'seller.form.field.category' | t }}</label>
+            <select id="category" class="bs-select" formControlName="categorySlug">
+              <option value="">{{ 'seller.form.field.categoryPlaceholder' | t }}</option>
+              @for (option of options(); track option.slug) {
+                <option [value]="option.slug">{{ option.label }}</option>
+              }
+            </select>
+            @if (errorFor('categorySlug'); as message) {
+              <p class="bs-error">{{ message }}</p>
+            } @else if (form.controls.categorySlug.touched && form.controls.categorySlug.invalid) {
+              <p class="bs-error">{{ 'seller.form.error.category' | t }}</p>
+            }
+          </div>
+
+          <div class="bs-field">
+            <label class="bs-label" for="price">{{ 'seller.form.field.price' | t }}</label>
+            <input id="price" class="bs-input" type="number" min="1" step="1" formControlName="price" />
+            @if (errorFor('price'); as message) {
+              <p class="bs-error">{{ message }}</p>
+            } @else if (form.controls.price.touched && form.controls.price.invalid) {
+              <p class="bs-error">{{ 'seller.form.error.price' | t }}</p>
+            }
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="bs-field">
+            <label class="bs-label" for="author">{{ 'seller.form.field.author' | t }}</label>
+            <input id="author" class="bs-input" type="text" formControlName="authorName" />
+            @if (errorFor('authorName'); as message) {
+              <p class="bs-error">{{ message }}</p>
+            }
+          </div>
+
+          <div class="bs-field">
+            <label class="bs-label" for="publisher">{{ 'seller.form.field.publisher' | t }}</label>
+            <input id="publisher" class="bs-input" type="text" formControlName="publisherName" />
+            @if (errorFor('publisherName'); as message) {
+              <p class="bs-error">{{ message }}</p>
+            }
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="bs-field">
+            <label class="bs-label" for="isbn">{{ 'seller.form.field.isbn' | t }}</label>
+            <input id="isbn" class="bs-input" type="text" inputmode="numeric" formControlName="isbn" />
+            @if (errorFor('isbn'); as message) {
+              <p class="bs-error">{{ message }}</p>
+            }
+          </div>
+
+          <div class="bs-field">
+            <label class="bs-label" for="year">{{ 'seller.form.field.year' | t }}</label>
+            <input id="year" class="bs-input" type="number" formControlName="publicationYear" />
+            @if (errorFor('publicationYear'); as message) {
+              <p class="bs-error">{{ message }}</p>
+            }
+          </div>
+
+          <div class="bs-field">
+            <label class="bs-label" for="pages">{{ 'seller.form.field.pages' | t }}</label>
+            <input id="pages" class="bs-input" type="number" formControlName="pageCount" />
+            @if (errorFor('pageCount'); as message) {
+              <p class="bs-error">{{ message }}</p>
+            }
+          </div>
+        </div>
+
+        <div class="bs-field">
+          <label class="bs-label" for="language">{{ 'seller.form.field.language' | t }}</label>
+          <select id="language" class="bs-select" formControlName="language">
+            @for (language of languages; track language) {
+              <option [value]="language">{{ 'language.' + language | t }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="bs-field">
+          <label class="bs-label" for="description">
+            {{ 'seller.form.field.description' | t }}
+          </label>
+          <textarea id="description" class="bs-textarea" formControlName="description"></textarea>
+          <p class="bs-hint">{{ 'seller.form.field.descriptionHint' | t }}</p>
+          @if (errorFor('description'); as message) {
+            <p class="bs-error">{{ message }}</p>
+          }
+        </div>
+
+        <h2 class="bs-card__title condition-title">{{ 'seller.form.section.condition' | t }}</h2>
+        <p class="bs-hint">{{ 'seller.form.section.conditionHint' | t }}</p>
+
+        <div class="grid-3" formGroupName="condition">
+          <div class="bs-field">
+            <label class="bs-label" for="grade">{{ 'seller.form.field.grade' | t }}</label>
+            <select id="grade" class="bs-select" formControlName="grade">
+              @for (grade of grades; track grade) {
+                <option [value]="grade">{{ grade | conditionLabel }}</option>
+              }
+            </select>
+            @if (errorFor('condition.grade'); as message) {
+              <p class="bs-error">{{ message }}</p>
+            }
+          </div>
+
+          <div class="bs-field">
+            <label class="bs-label" for="cover">{{ 'condition.cover' | t }}</label>
+            <select id="cover" class="bs-select" formControlName="coverCondition">
+              @for (grade of grades; track grade) {
+                <option [value]="grade">{{ grade | conditionLabel }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="bs-field">
+            <label class="bs-label" for="pagesCondition">
+              {{ 'condition.pages' | t }}
+            </label>
+            <select id="pagesCondition" class="bs-select" formControlName="pagesCondition">
+              @for (grade of grades; track grade) {
+                <option [value]="grade">{{ grade | conditionLabel }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="flags" formGroupName="condition">
+          <label class="bs-check">
+            <input type="checkbox" formControlName="hasWritingInside" />
+            <span>{{ 'condition.writingInside' | t }}</span>
+          </label>
+          <label class="bs-check">
+            <input type="checkbox" formControlName="hasHighlighting" />
+            <span>{{ 'condition.highlighting' | t }}</span>
+          </label>
+          <label class="bs-check">
+            <input type="checkbox" formControlName="hasTornPages" />
+            <span>{{ 'condition.tornPages' | t }}</span>
+          </label>
+          <label class="bs-check">
+            <input type="checkbox" formControlName="hasMissingPages" />
+            <span>{{ 'condition.missingPages' | t }}</span>
+          </label>
+          <label class="bs-check">
+            <input type="checkbox" formControlName="hasYellowing" />
+            <span>{{ 'condition.yellowing' | t }}</span>
+          </label>
+        </div>
+
+        <div class="grid-2" formGroupName="condition">
+          <div class="bs-field">
+            <label class="bs-label" for="otherDamage">
+              {{ 'condition.otherDamage' | t }}
+            </label>
+            <input id="otherDamage" class="bs-input" type="text" formControlName="otherDamage" />
+            @if (errorFor('condition.otherDamage'); as message) {
+              <p class="bs-error">{{ message }}</p>
+            }
+          </div>
+
+          <div class="bs-field">
+            <label class="bs-label" for="notes">{{ 'condition.notes' | t }}</label>
+            <input id="notes" class="bs-input" type="text" formControlName="notes" />
+            @if (errorFor('condition.notes'); as message) {
+              <p class="bs-error">{{ message }}</p>
+            }
+          </div>
+        </div>
+
+        @if (editable()) {
+          <div class="actions">
+            <button class="bs-button" type="submit" [disabled]="saving()">
+              {{ (saving() ? 'common.saving' : 'common.save') | t }}
+            </button>
+
+            @if (canSubmit()) {
+              <button
+                class="bs-button bs-button--ghost"
+                type="button"
+                [disabled]="saving()"
+                (click)="submitForReview()"
+              >
+                {{ 'seller.books.submit' | t }}
+              </button>
+            }
+          </div>
+        }
+      </form>
+
+      <aside class="side">
+        <section class="bs-card">
+          <h2 class="bs-card__title">{{ 'seller.form.section.photos' | t }}</h2>
+
+          @if (isNew()) {
+            <p class="bs-hint">{{ 'seller.form.photos.saveFirst' | t }}</p>
+          } @else if (book(); as current) {
+            @if (current.images.length === 0) {
+              <p class="bs-hint">{{ 'seller.form.photos.empty' | t }}</p>
+            } @else {
+              <ul class="photos">
+                @for (image of current.images; track image.id) {
+                  <li class="photo">
+                    <img
+                      class="photo__image"
+                      [src]="image.url"
+                      [alt]="image.altText ?? current.title"
+                      [width]="image.width"
+                      [height]="image.height"
+                      loading="lazy"
+                    />
+                    <span class="photo__type">{{ 'imageType.' + image.type | t }}</span>
+
+                    @if (current.isEditable) {
+                      <button
+                        type="button"
+                        class="photo__remove"
+                        (click)="removePhotograph(image.id)"
+                      >
+                        {{ 'common.delete' | t }}
+                      </button>
+                    }
+                  </li>
+                }
+              </ul>
+            }
+
+            @if (current.isEditable) {
+              <label class="bs-button bs-button--ghost bs-button--block upload">
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  [disabled]="uploading()"
+                  (change)="addPhotograph($event)"
+                />
+                {{ (uploading() ? 'seller.form.photos.uploading' : 'seller.form.photos.add') | t }}
+              </label>
+              <p class="bs-hint">{{ 'seller.form.photos.hint' | t }}</p>
+            }
+          }
+        </section>
+
+        @if (book(); as current) {
+          @if (current.timeline.length > 0) {
+            <section class="bs-card">
+              <h2 class="bs-card__title">{{ 'seller.form.section.timeline' | t }}</h2>
+
+              <ol class="timeline">
+                @for (entry of current.timeline; track entry.at) {
+                  <li class="timeline__entry">
+                    <ui-status-badge [status]="entry.toStatus" />
+                    <time class="timeline__at" [attr.datetime]="entry.at">
+                      {{ entry.at | date: 'short' }}
+                    </time>
+                    @if (entry.reason) {
+                      <p class="timeline__reason">{{ entry.reason }}</p>
+                    }
+                  </li>
+                }
+              </ol>
+            </section>
+          }
+        }
+      </aside>
+    </div>
+  }
+}

@@ -1,0 +1,72 @@
+<a class="bs-skip-link" href="#workspace">{{ 'app.skipToContent' | t }}</a>
+
+<div class="shell" [class.shell--menu-open]="menuOpen()">
+  <header class="topbar">
+    <button
+      type="button"
+      class="topbar__toggle"
+      (click)="toggleMenu()"
+      [attr.aria-expanded]="menuOpen()"
+      aria-controls="workspace-navigation"
+      [attr.aria-label]="(menuOpen() ? 'nav.closeMenu' : 'nav.openMenu') | t"
+    >
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        @if (menuOpen()) {
+          <path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" />
+        } @else {
+          <path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" />
+        }
+      </svg>
+    </button>
+
+    <a class="topbar__brand" routerLink="/">{{ 'app.name' | t }}</a>
+
+    <div class="topbar__actions">
+      <button
+        type="button"
+        class="topbar__language"
+        (click)="switchLanguage()"
+        [attr.aria-label]="'nav.languageLabel' | t"
+      >
+        {{ 'nav.language' | t }}
+      </button>
+
+      <a class="topbar__storefront" routerLink="/">{{ 'dashboard.viewStorefront' | t }}</a>
+
+      <span class="topbar__user">
+        <span class="topbar__avatar" aria-hidden="true">{{ initials() }}</span>
+        <span class="topbar__name">{{ auth.user()?.displayName }}</span>
+      </span>
+
+      <button type="button" class="topbar__signout" (click)="signOut()">
+        {{ 'auth.signOut' | t }}
+      </button>
+    </div>
+  </header>
+
+  <div class="shell__body">
+    <nav id="workspace-navigation" class="sidebar" [attr.aria-label]="'dashboard.navigation' | t">
+      <ul class="sidebar__list">
+        @for (item of items(); track item.path) {
+          <li>
+            <a
+              class="sidebar__link"
+              [routerLink]="item.path"
+              routerLinkActive="sidebar__link--active"
+              [routerLinkActiveOptions]="{ exact: item.exact }"
+              (click)="closeMenu()"
+            >
+              {{ item.labelKey | t }}
+            </a>
+          </li>
+        }
+      </ul>
+    </nav>
+
+    <main id="workspace" class="workspace">
+      <router-outlet />
+    </main>
+  </div>
+</div>
+
+<ui-toast-host />

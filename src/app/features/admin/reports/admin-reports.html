@@ -1,0 +1,150 @@
+<header class="bs-page-header">
+  <div>
+    <h1>{{ 'admin.reports.title' | t }}</h1>
+    <p>
+      @if (report(); as data) {
+        {{ data.from | date: 'shortDate' }} — {{ data.to | date: 'shortDate' }}
+      } @else {
+        {{ 'admin.reports.lead' | t }}
+      }
+    </p>
+  </div>
+</header>
+
+<div class="bs-toolbar">
+  <div class="bs-chips" role="group" [attr.aria-label]="'admin.reports.range.label' | t">
+    @for (range of ranges; track range.days) {
+      <button
+        type="button"
+        class="bs-chip"
+        [class.bs-chip--active]="activeRange() === range.days"
+        [attr.aria-pressed]="activeRange() === range.days"
+        (click)="chooseRange(range.days)"
+      >
+        {{ range.labelKey | t }}
+      </button>
+    }
+  </div>
+
+  <div class="bs-search dates">
+    <label class="bs-visually-hidden" for="report-from">{{ 'admin.reports.from' | t }}</label>
+    <input
+      id="report-from"
+      class="bs-input"
+      type="date"
+      [value]="from()"
+      (change)="changeFrom($event)"
+    />
+
+    <label class="bs-visually-hidden" for="report-to">{{ 'admin.reports.to' | t }}</label>
+    <input
+      id="report-to"
+      class="bs-input"
+      type="date"
+      [value]="to()"
+      (change)="changeTo($event)"
+    />
+
+    <button type="button" class="bs-button bs-button--ghost" (click)="load()">
+      {{ 'admin.reports.apply' | t }}
+    </button>
+  </div>
+</div>
+
+@switch (state()) {
+  @case ('loading') {
+    <div class="stats" aria-hidden="true">
+      @for (placeholder of placeholders; track placeholder) {
+        <div class="bs-card">
+          <ui-skeleton width="40%" height="1.6rem" />
+          <ui-skeleton width="70%" height="0.8rem" />
+        </div>
+      }
+    </div>
+  }
+
+  @case ('error') {
+    <ui-error-state
+      title="admin.reports.error.title"
+      text="admin.reports.error.text"
+      (retry)="load()"
+    />
+  }
+
+  @default {
+    @if (report(); as data) {
+      <!-- What sellers offered, and what the platform did about it -->
+      <section class="section">
+        <h2 class="section__title">{{ 'admin.reports.catalogue' | t }}</h2>
+
+        <div class="stats">
+          <ui-stat-card
+            [value]="data.catalogue.submitted"
+            label="admin.reports.submitted"
+          />
+          <ui-stat-card [value]="data.catalogue.approved" label="admin.reports.approved" />
+          <ui-stat-card [value]="data.catalogue.rejected" label="admin.reports.rejected" />
+          <ui-stat-card [value]="data.catalogue.published" label="admin.reports.published" />
+        </div>
+      </section>
+
+      <!-- What was bought, and what the platform earned from it -->
+      <section class="section">
+        <h2 class="section__title">{{ 'admin.reports.sales' | t }}</h2>
+
+        <div class="stats">
+          <ui-stat-card [value]="data.sales.orders" label="admin.reports.orders" />
+          <ui-stat-card [value]="data.sales.copies" label="admin.reports.copies" />
+          <ui-stat-card [value]="data.sales.cancelled" label="admin.reports.cancelled" />
+          <ui-stat-card
+            [value]="data.sales.gross | price: data.currency"
+            label="admin.reports.gross"
+          />
+          <ui-stat-card
+            [value]="data.sales.fees | price: data.currency"
+            label="admin.reports.fees"
+          />
+          <ui-stat-card
+            [value]="data.sales.sellerEarnings | price: data.currency"
+            label="admin.reports.sellerEarnings"
+          />
+          <ui-stat-card
+            [value]="data.sales.averageOrderValue | price: data.currency"
+            label="admin.reports.average"
+          />
+        </div>
+      </section>
+
+      <!-- Where the sold copies came from -->
+      <section class="bs-card">
+        <h2 class="bs-card__title">{{ 'admin.reports.topCategories' | t }}</h2>
+
+        @if (data.topCategories.length === 0) {
+          <p class="bs-muted">{{ 'admin.reports.nothingSold' | t }}</p>
+        } @else {
+          <div class="bs-table-scroll">
+            <table class="bs-table">
+              <thead>
+                <tr>
+                  <th scope="col">{{ 'book.category' | t }}</th>
+                  <th scope="col">{{ 'admin.reports.copies' | t }}</th>
+                  <th scope="col">{{ 'admin.reports.value' | t }}</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                @for (row of data.topCategories; track row.nameAr) {
+                  <tr>
+                    <td>{{ row.nameAr | categoryName: row.nameEn }}</td>
+                    <td>{{ row.copies }}</td>
+                    <td class="nowrap">{{ row.value | price: data.currency }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+    }
+  }
+}

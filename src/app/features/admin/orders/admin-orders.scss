@@ -1,0 +1,31 @@
+.skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bs-space-2);
+}
+
+.number {
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.buyer {
+  display: block;
+}
+
+// The opaque codes and the secondary dates sit under their row in a quieter voice,
+// because they are what you check rather than what you read.
+.code {
+  display: block;
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-xs);
+}
+
+.status {
+  display: block;
+  font-weight: 600;
+}
+
+.nowrap {
+  white-space: nowrap;
+}

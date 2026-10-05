@@ -1,0 +1,46 @@
+.state {
+  display: grid;
+  justify-items: center;
+  gap: var(--bs-space-3);
+  padding: var(--bs-space-8) var(--bs-space-4);
+  text-align: center;
+  color: var(--bs-text-muted);
+}
+
+.state__mark {
+  color: var(--bs-border-strong);
+}
+
+.state--error .state__mark {
+  color: var(--bs-danger);
+}
+
+.state__title {
+  margin: 0;
+  color: var(--bs-text);
+  font-size: var(--bs-text-lg);
+}
+
+.state__text {
+  margin: 0;
+  max-width: 42ch;
+}
+
+.state__action {
+  margin-block-start: var(--bs-space-2);
+  padding: var(--bs-space-2) var(--bs-space-5);
+  border: 1px solid var(--bs-primary);
+  border-radius: var(--bs-radius-pill);
+  background: transparent;
+  color: var(--bs-primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background var(--bs-transition),
+    color var(--bs-transition);
+
+  &:hover {
+    background: var(--bs-primary);
+    color: var(--bs-text-inverse);
+  }
+}

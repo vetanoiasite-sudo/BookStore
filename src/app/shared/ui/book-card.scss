@@ -1,0 +1,183 @@
+@use 'mixins' as m;
+
+.card {
+  position: relative;
+  height: 100%;
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius-md);
+  background: var(--bs-surface);
+  overflow: hidden;
+  transition:
+    border-color var(--bs-transition),
+    box-shadow var(--bs-transition),
+    transform var(--bs-transition);
+
+  &:hover {
+    border-color: var(--bs-primary);
+    box-shadow: var(--bs-shadow-md);
+    transform: translateY(-3px);
+  }
+
+  &:focus-within {
+    @include m.focus-ring;
+  }
+}
+
+.card__link {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  color: inherit;
+
+  &:hover {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+.card__cover {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  background: var(--bs-surface-muted);
+  overflow: hidden;
+}
+
+.card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card__cover-fallback {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--bs-border-strong);
+  font-family: var(--bs-font-serif);
+  font-size: 3rem;
+}
+
+.card__condition {
+  position: absolute;
+  inset-block-start: var(--bs-space-2);
+  inset-inline-start: var(--bs-space-2);
+  padding: 0.15rem var(--bs-space-2);
+  border-radius: var(--bs-radius-sm);
+  background: var(--bs-highlight);
+  color: var(--bs-ink);
+  font-family: var(--bs-font-display);
+  font-size: var(--bs-text-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.card__body {
+  display: grid;
+  align-content: start;
+  gap: var(--bs-space-1);
+  padding: var(--bs-space-3);
+}
+
+.card__category {
+  margin: 0;
+  color: var(--bs-accent);
+  font-size: var(--bs-text-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.card__title {
+  margin: 0;
+  font-family: var(--bs-font-serif);
+  font-size: var(--bs-text-base);
+  line-height: 1.4;
+  @include m.line-clamp(2);
+}
+
+.card__author {
+  margin: 0;
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-sm);
+  @include m.line-clamp(1);
+}
+
+.card__price {
+  margin: var(--bs-space-1) 0 0;
+  color: var(--bs-primary);
+  font-family: var(--bs-font-display);
+  font-size: var(--bs-text-xl);
+  font-weight: 700;
+}
+
+// A copy that can no longer be bought still shows its cover, dimmed, because the
+// reader saved it and deserves to see which book it was.
+.card--gone {
+  .card__image {
+    filter: grayscale(1);
+    opacity: 0.65;
+  }
+}
+
+.card__gone {
+  position: absolute;
+  inset-block-end: var(--bs-space-2);
+  inset-inline-start: var(--bs-space-2);
+  padding: 0.15rem var(--bs-space-2);
+  border-radius: var(--bs-radius-pill);
+  background: var(--bs-danger);
+  color: var(--bs-text-inverse);
+  font-size: var(--bs-text-xs);
+  font-weight: 600;
+}
+
+// Sits over the cover, outside the link, so tapping it saves the book rather than
+// opening it.
+.card__save {
+  position: absolute;
+  z-index: 1;
+  inset-block-start: var(--bs-space-2);
+  inset-inline-end: var(--bs-space-2);
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--bs-radius-pill);
+  background: rgb(255 255 255 / 92%);
+  color: var(--bs-text-muted);
+  cursor: pointer;
+  transition: color var(--bs-transition);
+
+  &:hover:not(:disabled) {
+    color: var(--bs-danger);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: progress;
+  }
+}
+
+.card__save--on {
+  color: var(--bs-danger);
+}
+
+.card--skeleton {
+  display: grid;
+  grid-template-rows: auto 1fr;
+
+  ui-skeleton:first-child {
+    aspect-ratio: 2 / 3;
+  }
+
+  .card__body {
+    gap: var(--bs-space-2);
+  }
+}

@@ -1,0 +1,122 @@
+@use 'mixins' as m;
+@use 'tokens' as t;
+
+.orders {
+  padding-block: var(--bs-space-6) var(--bs-space-8);
+}
+
+.orders__browse {
+  margin-block-start: var(--bs-space-4);
+  text-align: center;
+}
+
+.list {
+  display: grid;
+  gap: var(--bs-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  padding: 0;
+}
+
+.row__link {
+  display: grid;
+  gap: var(--bs-space-4);
+  grid-template-columns: 56px minmax(0, 1fr);
+  align-items: center;
+  padding: var(--bs-space-4);
+  color: inherit;
+
+  &:hover {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  @include m.from(t.$bs-bp-md) {
+    grid-template-columns: 56px minmax(0, 1fr) auto;
+  }
+}
+
+.row__cover {
+  width: 56px;
+  height: 80px;
+  border-radius: var(--bs-radius-sm);
+  object-fit: cover;
+}
+
+.row__cover--empty {
+  display: block;
+  background: var(--bs-surface-muted);
+}
+
+.row__body {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.row__number {
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-xs);
+  letter-spacing: 0.04em;
+}
+
+.row__title {
+  font-family: var(--bs-font-serif);
+  font-size: var(--bs-text-base);
+  @include m.line-clamp(1);
+}
+
+.row__more,
+.row__date {
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-sm);
+}
+
+.row__side {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bs-space-3);
+  grid-column: 1 / -1;
+
+  @include m.from(t.$bs-bp-md) {
+    flex-direction: column;
+    align-items: flex-end;
+    grid-column: auto;
+  }
+}
+
+// The status is the thing being looked for, so it is the thing that carries colour.
+.row__status {
+  padding: 0.15rem var(--bs-space-3);
+  border-radius: var(--bs-radius-pill);
+  background: var(--bs-surface-muted);
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-xs);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.row__status--waiting {
+  background: color-mix(in srgb, var(--bs-warning) 15%, var(--bs-surface));
+  color: var(--bs-warning);
+}
+
+.row__status--done {
+  background: var(--bs-primary-soft);
+  color: var(--bs-primary);
+}
+
+.row__status--off {
+  background: color-mix(in srgb, var(--bs-danger) 12%, var(--bs-surface));
+  color: var(--bs-danger);
+}
+
+.row__total {
+  font-weight: 700;
+  white-space: nowrap;
+}

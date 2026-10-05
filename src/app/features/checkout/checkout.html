@@ -1,0 +1,180 @@
+<section class="checkout">
+  <div class="bs-container">
+    <header class="bs-page-header">
+      <div>
+        <h1>{{ 'checkout.title' | t }}</h1>
+        <p>{{ 'checkout.lead' | t }}</p>
+      </div>
+    </header>
+
+    @switch (state()) {
+      @case ('loading') {
+        <div class="layout">
+          <div class="bs-card" aria-hidden="true">
+            @for (placeholder of placeholders; track placeholder) {
+              <ui-skeleton width="60%" height="1.1rem" />
+              <ui-skeleton width="90%" height="0.9rem" />
+            }
+          </div>
+          <div class="bs-card" aria-hidden="true">
+            <ui-skeleton width="50%" height="1.1rem" />
+            <ui-skeleton width="80%" height="0.9rem" />
+          </div>
+        </div>
+      }
+
+      @case ('error') {
+        <ui-error-state title="checkout.error.title" text="cart.error.text" (retry)="load()" />
+      }
+
+      @default {
+        @if (cart(); as basket) {
+          @if (basket.itemCount === 0) {
+            <div class="bs-card empty">
+              <h2 class="bs-card__title">{{ 'cart.empty.title' | t }}</h2>
+              <p>{{ 'cart.empty.text' | t }}</p>
+              <a class="bs-button" routerLink="/books">{{ 'cart.empty.action' | t }}</a>
+            </div>
+          } @else {
+            <div class="layout">
+              <div class="column">
+                <!-- Where it goes -->
+                <section class="bs-card">
+                  <h2 class="bs-card__title">{{ 'checkout.address.title' | t }}</h2>
+
+                  @if (saved().length > 0) {
+                    <ul class="choices">
+                      @for (address of saved(); track address.id) {
+                        <li>
+                          <label class="choice" [class.choice--on]="selectedId() === address.id">
+                            <input
+                              type="radio"
+                              name="address"
+                              [value]="address.id"
+                              [checked]="selectedId() === address.id"
+                              (change)="select(address)"
+                            />
+
+                            <span class="choice__body">
+                              <span class="choice__label">
+                                {{ address.label }}
+                                @if (address.isDefault) {
+                                  <span class="choice__default">{{ 'address.default' | t }}</span>
+                                }
+                              </span>
+                              <span class="choice__recipient">{{ address.recipientName }}</span>
+                              <span class="choice__line">{{ address.formatted }}</span>
+                              <span class="choice__phone">{{ address.phoneNumber }}</span>
+                            </span>
+                          </label>
+                        </li>
+                      }
+                    </ul>
+                  } @else {
+                    <p class="hint">{{ 'checkout.address.none' | t }}</p>
+                  }
+
+                  @if (formOpen()) {
+                    <div class="new-address">
+                      <h3 class="new-address__title">{{ 'address.addTitle' | t }}</h3>
+                      <address-form
+                        [saving]="savingAddress()"
+                        [cancellable]="saved().length > 0"
+                        (save)="saveAddress($event)"
+                        (cancelled)="closeForm()"
+                      />
+                    </div>
+                  } @else {
+                    <button type="button" class="bs-button bs-button--ghost" (click)="openForm()">
+                      {{ 'checkout.address.add' | t }}
+                    </button>
+                  }
+                </section>
+
+                <!-- What is being bought -->
+                <section class="bs-card">
+                  <h2 class="bs-card__title">{{ 'checkout.items.title' | t }}</h2>
+
+                  <ul class="lines">
+                    @for (line of basket.items; track line.book.publicId) {
+                      <li class="line" [class.line--gone]="!line.isAvailable">
+                        @if (line.book.coverImageUrl; as cover) {
+                          <img
+                            class="line__cover"
+                            [src]="cover"
+                            [alt]="line.book.title"
+                            loading="lazy"
+                            width="48"
+                            height="70"
+                          />
+                        }
+
+                        <div class="line__body">
+                          <p class="line__title">{{ line.book.title }}</p>
+                          <p class="line__author">
+                            {{ line.book.authorName ?? ('book.unknown' | t) }}
+                          </p>
+
+                          @if (!line.isAvailable) {
+                            <p class="line__gone">{{ 'cart.line.unavailable' | t }}</p>
+                          }
+                        </div>
+
+                        <p class="line__price">{{ line.book.price | price: basket.currency }}</p>
+                      </li>
+                    }
+                  </ul>
+
+                  @if (basket.hasUnavailableItems) {
+                    <p class="blocked" role="alert">
+                      {{ 'checkout.blocked' | t }}
+                      <a routerLink="/cart">{{ 'checkout.backToCart' | t }}</a>
+                    </p>
+                  }
+                </section>
+              </div>
+
+              <!-- What it comes to -->
+              <aside class="bs-card summary" [attr.aria-label]="'cart.summary.title' | t">
+                <h2 class="bs-card__title">{{ 'cart.summary.title' | t }}</h2>
+
+                <dl class="summary__rows">
+                  <div class="summary__row">
+                    <dt>{{ 'cart.summary.items' | t }}</dt>
+                    <dd>{{ basket.availableCount }}</dd>
+                  </div>
+                  <div class="summary__row">
+                    <dt>{{ 'cart.summary.subtotal' | t }}</dt>
+                    <dd>{{ basket.subtotal | price: basket.currency }}</dd>
+                  </div>
+                  <div class="summary__row">
+                    <dt>{{ 'checkout.shipping' | t }}</dt>
+                    <dd>{{ basket.shippingCost | price: basket.currency }}</dd>
+                  </div>
+                  <div class="summary__row summary__row--total">
+                    <dt>{{ 'checkout.total' | t }}</dt>
+                    <dd>{{ basket.total | price: basket.currency }}</dd>
+                  </div>
+                </dl>
+
+                <button
+                  type="button"
+                  class="bs-button bs-button--block"
+                  [disabled]="placing() || blocked() || !selectedId()"
+                  (click)="place()"
+                >
+                  {{ (placing() ? 'checkout.placing' : 'checkout.place') | t }}
+                </button>
+
+                <p class="summary__note">{{ 'checkout.reservationNote' | t }}</p>
+                <p class="summary__note">{{ 'checkout.paymentNote' | t }}</p>
+
+                <a class="summary__back" routerLink="/cart">{{ 'checkout.backToCart' | t }}</a>
+              </aside>
+            </div>
+          }
+        }
+      }
+    }
+  </div>
+</section>

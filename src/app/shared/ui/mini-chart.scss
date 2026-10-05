@@ -1,0 +1,60 @@
+.chart {
+  margin: 0;
+  padding: var(--bs-space-4);
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius-md);
+  background: var(--bs-surface);
+}
+
+.chart__caption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--bs-space-3);
+  margin-block-end: var(--bs-space-3);
+}
+
+.chart__label {
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-sm);
+}
+
+.chart__total {
+  font-size: var(--bs-text-xl);
+  font-weight: 700;
+  color: var(--bs-primary);
+}
+
+// The drawing scales to whatever box it is given; the height is what makes it a
+// chart rather than a line.
+.chart__svg {
+  display: block;
+  width: 100%;
+  height: 5rem;
+  overflow: visible;
+}
+
+.chart__bar {
+  fill: var(--bs-primary);
+  opacity: 0.85;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+// Only the ends are labelled: a fortnight of dates under a chart this size is
+// unreadable, and the first and last are what say what window it covers.
+.chart__axis {
+  display: flex;
+  justify-content: space-between;
+  margin: var(--bs-space-2) 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-xs);
+
+  li:not(:first-child):not(:last-child) {
+    display: none;
+  }
+}

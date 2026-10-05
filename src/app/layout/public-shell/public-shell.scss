@@ -1,0 +1,383 @@
+@use 'mixins' as m;
+@use 'tokens' as t;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+// --- Header ---------------------------------------------------------------
+
+.header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 20;
+  background: var(--bs-surface);
+  border-block-end: 1px solid var(--bs-border);
+}
+
+.header__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--bs-space-4);
+  min-height: var(--bs-header-height);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bs-space-2);
+  color: var(--bs-primary);
+  font-weight: 700;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.brand__mark {
+  display: grid;
+  place-items: center;
+}
+
+.brand__name {
+  font-family: var(--bs-font-display);
+  font-size: var(--bs-text-xl);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  @include m.until(t.$bs-bp-sm) {
+    // The mark alone carries the brand once the bar gets tight.
+    @include m.visually-hidden;
+  }
+}
+
+.header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--bs-space-2);
+  margin-inline-start: auto;
+}
+
+// The basket and the saved list are the two things a shopper reaches for most, so
+// they sit in the header as icons rather than behind a menu.
+.header__icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--bs-radius-pill);
+  color: var(--bs-text-muted);
+
+  &:hover {
+    background: var(--bs-surface-muted);
+    color: var(--bs-primary);
+    text-decoration: none;
+  }
+}
+
+.header__icon--active {
+  color: var(--bs-primary);
+}
+
+.header__badge {
+  position: absolute;
+  inset-block-start: -0.15rem;
+  inset-inline-end: -0.15rem;
+  min-width: 1.1rem;
+  padding-inline: 0.25rem;
+  border-radius: var(--bs-radius-pill);
+  background: var(--bs-highlight);
+  box-shadow: 0 0 0 1px var(--bs-primary);
+  color: var(--bs-ink);
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.1rem;
+  text-align: center;
+}
+
+.header__language {
+  padding: var(--bs-space-2) var(--bs-space-3);
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius-pill);
+  background: transparent;
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-sm);
+  cursor: pointer;
+  transition:
+    border-color var(--bs-transition),
+    color var(--bs-transition);
+
+  &:hover {
+    border-color: var(--bs-primary);
+    color: var(--bs-primary);
+  }
+}
+
+.header__toggle {
+  display: grid;
+  place-items: center;
+  padding: var(--bs-space-2);
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius-sm);
+  background: transparent;
+  color: var(--bs-text);
+  cursor: pointer;
+
+  @include m.from(t.$bs-bp-lg) {
+    display: none;
+  }
+}
+
+// --- Search ---------------------------------------------------------------
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: var(--bs-space-2);
+  flex: 1;
+  max-width: 520px;
+  padding: 0 var(--bs-space-2) 0 0;
+  border: 2px solid var(--bs-border);
+  border-radius: var(--bs-radius-md);
+  background: var(--bs-bg);
+  transition: border-color var(--bs-transition);
+
+  &:focus-within {
+    border-color: var(--bs-primary);
+  }
+}
+
+.search--desktop {
+  @include m.until(t.$bs-bp-lg) {
+    display: none;
+  }
+}
+
+.search--mobile {
+  max-width: none;
+  margin-block-end: var(--bs-space-4);
+
+  @include m.from(t.$bs-bp-lg) {
+    display: none;
+  }
+}
+
+.search__input {
+  flex: 1;
+  min-width: 0;
+  padding: var(--bs-space-3) var(--bs-space-4);
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  font-size: var(--bs-text-sm);
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.search__button {
+  @include m.button-base;
+  padding: var(--bs-space-2) var(--bs-space-4);
+  box-shadow: none;
+}
+
+// --- Navigation -----------------------------------------------------------
+
+// The purple menu bar, as on SuperPark: white links, the current one marked in yellow.
+.nav {
+  background: var(--bs-primary);
+  color: var(--bs-text-inverse);
+
+  @include m.until(t.$bs-bp-lg) {
+    // Collapsed by default on small screens; the toggle opens it.
+    display: none;
+
+    &.nav--open {
+      display: block;
+      padding-block: var(--bs-space-4);
+    }
+  }
+}
+
+.nav__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--bs-space-5);
+
+  @include m.until(t.$bs-bp-lg) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--bs-space-3);
+  }
+}
+
+.nav__list {
+  display: flex;
+  align-items: center;
+  gap: var(--bs-space-5);
+
+  @include m.until(t.$bs-bp-lg) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+
+  a {
+    display: block;
+    padding-block: var(--bs-space-3);
+    position: relative;
+    color: var(--bs-text-inverse);
+    font-family: var(--bs-font-display);
+    font-size: var(--bs-text-sm);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+
+    &:hover {
+      color: var(--bs-highlight);
+      text-decoration: none;
+    }
+
+    @include m.until(t.$bs-bp-lg) {
+      border-block-end: 1px solid rgb(255 255 255 / 15%);
+    }
+  }
+}
+
+.nav__link--active {
+  color: var(--bs-highlight) !important;
+  font-weight: 700 !important;
+
+  @include m.from(t.$bs-bp-lg) {
+    box-shadow: inset 0 -4px 0 var(--bs-highlight);
+  }
+}
+
+.nav__sell {
+  @include m.button-base;
+  @include m.button-highlight;
+  margin-inline-start: auto;
+  padding: var(--bs-space-2) var(--bs-space-5);
+
+  @include m.until(t.$bs-bp-lg) {
+    margin-inline-start: 0;
+  }
+}
+
+// --- Main and footer ------------------------------------------------------
+
+.main {
+  flex: 1;
+}
+
+.footer {
+  margin-block-start: var(--bs-space-8);
+  padding-block: var(--bs-space-7) 0;
+  background: var(--bs-ink-deep);
+  color: var(--bs-text-inverse);
+}
+
+.footer__inner {
+  display: grid;
+  gap: var(--bs-space-6);
+  grid-template-columns: 1fr;
+
+  @include m.from(t.$bs-bp-md) {
+    grid-template-columns: 2fr 1fr 1fr;
+  }
+}
+
+.footer__title {
+  margin: 0 0 var(--bs-space-3);
+  color: var(--bs-highlight);
+  font-size: var(--bs-text-lg);
+}
+
+.footer__text {
+  margin: 0;
+  max-width: 46ch;
+  color: rgb(255 255 255 / 75%);
+  font-size: var(--bs-text-sm);
+}
+
+.footer__list {
+  display: grid;
+  gap: var(--bs-space-2);
+
+  a {
+    color: #f5f7f7;
+    font-size: var(--bs-text-sm);
+
+    &:hover {
+      color: var(--bs-highlight);
+    }
+  }
+}
+
+// Full-bleed credits strip in the slightly lighter plum, as on SuperPark.
+.footer__rights {
+  margin: var(--bs-space-6) 0 0;
+  padding-block: var(--bs-space-4);
+  box-shadow: 0 0 0 100vmax var(--bs-ink);
+  clip-path: inset(0 -100vmax);
+  background: var(--bs-ink);
+  text-align: center;
+  color: rgb(255 255 255 / 70%);
+  font-size: var(--bs-text-xs);
+}
+
+// Signed-out visitors get a way in from the header; signed-in ones get a way
+// back to whichever workspace they belong to.
+.header__signin,
+.header__workspace {
+  font-size: var(--bs-text-sm);
+  white-space: nowrap;
+}
+
+.nav__signin,
+.nav__signout {
+  display: inline-block;
+  margin-block-start: var(--bs-space-3);
+  font-size: var(--bs-text-sm);
+}
+
+// Signing out is a plain action, not a call to action: it borrows the quiet outline
+// of the language switch next to it rather than competing with the sell button.
+.header__signout,
+.nav__signout {
+  padding: var(--bs-space-2) var(--bs-space-3);
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius-pill);
+  background: transparent;
+  color: var(--bs-text-muted);
+  font: inherit;
+  font-size: var(--bs-text-sm);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    border-color var(--bs-transition),
+    color var(--bs-transition);
+
+  &:hover {
+    border-color: var(--bs-primary);
+    color: var(--bs-primary);
+  }
+}
+
+// Inside the purple menu the quiet actions switch to light outlines.
+.nav .nav__signout,
+.nav .nav__signin {
+  border-color: rgb(255 255 255 / 40%);
+  color: var(--bs-text-inverse);
+
+  &:hover {
+    border-color: var(--bs-highlight);
+    color: var(--bs-highlight);
+  }
+}

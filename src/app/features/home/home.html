@@ -1,0 +1,130 @@
+<section class="hero">
+  <div class="bs-container hero__inner">
+    <h1 class="hero__title">{{ 'app.tagline' | t }}</h1>
+    <p class="hero__lead">{{ 'home.hero.lead' | t }}</p>
+
+    <div class="hero__actions">
+      <a class="button button--primary" routerLink="/books">{{ 'home.hero.browse' | t }}</a>
+      <a class="button button--ghost" routerLink="/seller/books/new">{{ 'home.hero.sell' | t }}</a>
+    </div>
+  </div>
+</section>
+
+<section class="strip">
+  <div class="bs-container">
+    <header class="strip__header">
+      <div>
+        <h2 class="strip__title">{{ 'home.featured.title' | t }}</h2>
+        <p class="strip__subtitle">{{ 'home.featured.subtitle' | t }}</p>
+      </div>
+      <a class="strip__all" routerLink="/books" [queryParams]="{ sort: 'MostPopular' }">
+        {{ 'home.viewAll' | t }}
+      </a>
+    </header>
+
+    @switch (featuredState()) {
+      @case ('loading') {
+        <div class="grid">
+          @for (placeholder of placeholders; track placeholder) {
+            <book-card-skeleton />
+          }
+        </div>
+      }
+      @case ('error') {
+        <p class="strip__error">
+          {{ 'books.error.text' | t }}
+          <button type="button" (click)="loadFeatured()">{{ 'common.retry' | t }}</button>
+        </p>
+      }
+      @default {
+        @if (featured().length === 0) {
+          <p class="strip__empty">{{ 'books.countNone' | t }}</p>
+        } @else {
+          <div class="grid">
+            @for (book of featured(); track book.publicId) {
+              <book-card [book]="book" />
+            }
+          </div>
+        }
+      }
+    }
+  </div>
+</section>
+
+<section class="strip strip--muted">
+  <div class="bs-container">
+    <header class="strip__header">
+      <div>
+        <h2 class="strip__title">{{ 'home.newArrivals.title' | t }}</h2>
+        <p class="strip__subtitle">{{ 'home.newArrivals.subtitle' | t }}</p>
+      </div>
+      <a class="strip__all" routerLink="/books">{{ 'home.viewAll' | t }}</a>
+    </header>
+
+    @switch (arrivalsState()) {
+      @case ('loading') {
+        <div class="grid">
+          @for (placeholder of placeholders; track placeholder) {
+            <book-card-skeleton />
+          }
+        </div>
+      }
+      @case ('error') {
+        <p class="strip__error">
+          {{ 'books.error.text' | t }}
+          <button type="button" (click)="loadArrivals()">{{ 'common.retry' | t }}</button>
+        </p>
+      }
+      @default {
+        @if (arrivals().length === 0) {
+          <p class="strip__empty">{{ 'books.countNone' | t }}</p>
+        } @else {
+          <div class="grid">
+            @for (book of arrivals(); track book.publicId) {
+              <book-card [book]="book" />
+            }
+          </div>
+        }
+      }
+    }
+  </div>
+</section>
+
+<section class="steps">
+  <div class="bs-container">
+    <h2 class="steps__title">{{ 'home.howItWorks.title' | t }}</h2>
+
+    <ol class="steps__list">
+      <li class="step">
+        <span class="step__number" aria-hidden="true">1</span>
+        <h3 class="step__title">{{ 'home.howItWorks.step1.title' | t }}</h3>
+        <p class="step__text">{{ 'home.howItWorks.step1.text' | t }}</p>
+      </li>
+      <li class="step">
+        <span class="step__number" aria-hidden="true">2</span>
+        <h3 class="step__title">{{ 'home.howItWorks.step2.title' | t }}</h3>
+        <p class="step__text">{{ 'home.howItWorks.step2.text' | t }}</p>
+      </li>
+      <li class="step">
+        <span class="step__number" aria-hidden="true">3</span>
+        <h3 class="step__title">{{ 'home.howItWorks.step3.title' | t }}</h3>
+        <p class="step__text">{{ 'home.howItWorks.step3.text' | t }}</p>
+      </li>
+      <li class="step">
+        <span class="step__number" aria-hidden="true">4</span>
+        <h3 class="step__title">{{ 'home.howItWorks.step4.title' | t }}</h3>
+        <p class="step__text">{{ 'home.howItWorks.step4.text' | t }}</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="bs-container cta__inner">
+    <div>
+      <h2 class="cta__title">{{ 'home.cta.title' | t }}</h2>
+      <p class="cta__text">{{ 'home.cta.text' | t }}</p>
+    </div>
+    <a class="button button--inverse" routerLink="/seller/books/new">{{ 'home.cta.button' | t }}</a>
+  </div>
+</section>

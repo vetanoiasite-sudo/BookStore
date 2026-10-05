@@ -1,0 +1,88 @@
+// Design tokens for the whole platform. Components must reference these
+// variables rather than raw colour or spacing values.
+
+:root {
+  // Palette borrowed from SuperPark: a deep purple brand, a neon yellow highlight
+  // that only ever sits on purple or plum, and near-black plum for heavy surfaces.
+
+  // Surfaces
+  --bs-bg: #f5f7f7;
+  --bs-surface: #ffffff;
+  --bs-surface-muted: #f0f0f0;
+
+  // Text
+  --bs-text: #22182c;
+  --bs-text-muted: #50525b;
+  --bs-text-inverse: #ffffff;
+
+  // Brand
+  --bs-primary: #662483;
+  --bs-primary-hover: #47195b;
+  --bs-primary-soft: #f1e6f6;
+  --bs-primary-light: #6a2788;
+  --bs-accent: #662483;
+  --bs-accent-soft: #f1e6f6;
+
+  // The neon yellow. Text on it is always --bs-ink; never use it as text on white.
+  --bs-highlight: #f0ff00;
+  --bs-highlight-hover: #f3ff33;
+
+  // Dark plum used by the footer, the mobile menu and other heavy blocks.
+  --bs-ink: #22182c;
+  --bs-ink-deep: #200d28;
+  --bs-mint: #2ae2a3;
+
+  // Feedback
+  --bs-success: #117c57;
+  --bs-warning: #a8740f;
+  --bs-danger: #c8102e;
+  --bs-info: #2f5f7d;
+
+  // Lines and depth
+  --bs-border: #e4e4e4;
+  --bs-border-strong: #cccccc;
+  --bs-shadow-sm: 0 1px 4px rgb(0 0 0 / 10%);
+  --bs-shadow-md: 0 6px 18px rgb(34 24 44 / 12%);
+  --bs-shadow-lg: 0 14px 34px rgb(34 24 44 / 16%);
+
+  // Spacing scale (4px base)
+  --bs-space-1: 0.25rem;
+  --bs-space-2: 0.5rem;
+  --bs-space-3: 0.75rem;
+  --bs-space-4: 1rem;
+  --bs-space-5: 1.5rem;
+  --bs-space-6: 2rem;
+  --bs-space-7: 3rem;
+  --bs-space-8: 4rem;
+
+  // Radii
+  --bs-radius-sm: 2px;
+  --bs-radius-md: 3px;
+  --bs-radius-lg: 4px;
+  --bs-radius-pill: 999px;
+
+  // Typography
+  --bs-font-sans: 'Cairo', 'Segoe UI', system-ui, sans-serif;
+  // Oswald carries Latin text; Arabic glyphs fall through to Cairo at a heavy weight.
+  --bs-font-display: 'Oswald', 'Cairo', sans-serif;
+  --bs-font-serif: var(--bs-font-display);
+  --bs-text-xs: 0.75rem;
+  --bs-text-sm: 0.875rem;
+  --bs-text-base: 1rem;
+  --bs-text-lg: 1.125rem;
+  --bs-text-xl: 1.375rem;
+  --bs-text-2xl: 1.75rem;
+  --bs-text-3xl: 2.25rem;
+
+  // Layout
+  --bs-container: 1200px;
+  --bs-header-height: 72px;
+
+  --bs-transition: 200ms ease;
+}
+
+// SCSS breakpoints, used with the mixins below.
+$bs-bp-sm: 480px;
+$bs-bp-md: 768px;
+$bs-bp-lg: 1024px;
+$bs-bp-xl: 1280px;

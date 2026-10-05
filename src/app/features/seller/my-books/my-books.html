@@ -1,0 +1,153 @@
+<header class="bs-page-header">
+  <div>
+    <h1>{{ 'seller.books.title' | t }}</h1>
+    @if (state() === 'ready' && result(); as page) {
+      <p>{{ 'seller.books.count' | t: { count: page.totalCount } }}</p>
+    }
+  </div>
+
+  <div class="bs-page-header__actions">
+    <a class="bs-button" routerLink="/seller/books/new">{{ 'seller.addBook' | t }}</a>
+  </div>
+</header>
+
+<div class="toolbar">
+  <div class="filters" role="group" [attr.aria-label]="'seller.books.filter.label' | t">
+    @for (filter of filters; track filter.value) {
+      <button
+        type="button"
+        class="filters__chip"
+        [class.filters__chip--active]="status() === filter.value"
+        [attr.aria-pressed]="status() === filter.value"
+        (click)="changeFilter(filter.value)"
+      >
+        {{ filter.labelKey | t }}
+      </button>
+    }
+  </div>
+
+  <form class="toolbar__search" (submit)="search($event)" role="search">
+    <label class="bs-visually-hidden" for="seller-search">
+      {{ 'seller.books.search' | t }}
+    </label>
+    <input
+      id="seller-search"
+      name="term"
+      class="bs-input"
+      type="search"
+      [value]="term()"
+      [attr.placeholder]="'seller.books.search' | t"
+    />
+    <button class="bs-button bs-button--ghost" type="submit">{{ 'search.submit' | t }}</button>
+  </form>
+</div>
+
+@switch (state()) {
+  @case ('loading') {
+    <div class="skeletons">
+      @for (placeholder of placeholders; track placeholder) {
+        <ui-skeleton height="3rem" />
+      }
+    </div>
+  }
+
+  @case ('error') {
+    <ui-error-state
+      title="seller.books.error.title"
+      text="seller.books.error.text"
+      (retry)="load()"
+    />
+  }
+
+  @default {
+    @if (isEmpty()) {
+      <ui-empty-state
+        title="seller.books.empty.title"
+        text="seller.books.empty.text"
+      />
+    } @else if (result(); as page) {
+      <div class="bs-table-scroll">
+        <table class="bs-table">
+          <thead>
+            <tr>
+              <th scope="col">{{ 'seller.books.column.book' | t }}</th>
+              <th scope="col">{{ 'seller.books.column.code' | t }}</th>
+              <th scope="col">{{ 'seller.books.column.price' | t }}</th>
+              <th scope="col">{{ 'seller.books.column.status' | t }}</th>
+              <th scope="col">{{ 'seller.books.column.photos' | t }}</th>
+              <th scope="col">{{ 'seller.books.column.views' | t }}</th>
+              <th scope="col"><span class="bs-visually-hidden">{{ 'common.actions' | t }}</span></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (book of page.items; track book.publicId) {
+              <tr>
+                <td>
+                  <a class="row__title" [routerLink]="['/seller/books', book.publicId]">
+                    {{ book.title }}
+                  </a>
+                  @if (book.authorName) {
+                    <span class="row__author">{{ book.authorName }}</span>
+                  }
+                  @if (book.status === 'rejected' && book.rejectionReason) {
+                    <p class="row__reason">{{ book.rejectionReason }}</p>
+                  }
+                </td>
+                <td class="row__code">{{ book.publicId }}</td>
+                <td>{{ book.price | price: book.currency }}</td>
+                <td><ui-status-badge [status]="book.status" /></td>
+                <td>{{ book.imageCount }}</td>
+                <td>{{ book.viewCount }}</td>
+                <td class="row__actions">
+                  @if (book.isEditable) {
+                    <a class="row__action" [routerLink]="['/seller/books', book.publicId]">
+                      {{ 'common.edit' | t }}
+                    </a>
+                  }
+
+                  @if (canSubmit(book)) {
+                    <button
+                      type="button"
+                      class="row__action"
+                      [disabled]="busy() === book.publicId"
+                      (click)="submit(book)"
+                    >
+                      {{ 'seller.books.submit' | t }}
+                    </button>
+                  }
+
+                  @if (book.status === 'draft') {
+                    <button
+                      type="button"
+                      class="row__action row__action--danger"
+                      [disabled]="busy() === book.publicId"
+                      (click)="remove(book)"
+                    >
+                      {{ 'common.delete' | t }}
+                    </button>
+                  } @else if (canWithdraw(book)) {
+                    <button
+                      type="button"
+                      class="row__action row__action--danger"
+                      [disabled]="busy() === book.publicId"
+                      (click)="withdraw(book)"
+                    >
+                      {{ 'seller.books.withdraw' | t }}
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <ui-pagination
+        [page]="page.page"
+        [totalPages]="page.totalPages"
+        (pageChange)="changePage($event)"
+      />
+    }
+  }
+}

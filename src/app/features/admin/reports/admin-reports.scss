@@ -1,0 +1,34 @@
+@use 'mixins' as m;
+@use 'tokens' as t;
+
+.section {
+  margin-block-end: var(--bs-space-6);
+}
+
+.section__title {
+  margin: 0 0 var(--bs-space-3);
+  font-size: var(--bs-text-base);
+  color: var(--bs-text-muted);
+}
+
+.stats {
+  display: grid;
+  gap: var(--bs-space-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  @include m.from(t.$bs-bp-md) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.dates {
+  flex-wrap: wrap;
+
+  .bs-input {
+    min-width: 9rem;
+  }
+}
+
+.nowrap {
+  white-space: nowrap;
+}

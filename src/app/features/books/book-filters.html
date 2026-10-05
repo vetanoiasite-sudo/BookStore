@@ -1,0 +1,208 @@
+<div class="filters" [class.filters--open]="open()">
+  <div class="filters__bar">
+    <h2 class="filters__heading">{{ 'filters.title' | t }}</h2>
+
+    @if (activeCount() > 0) {
+      <button type="button" class="filters__clear" (click)="clearAll()">
+        {{ 'filters.clearAll' | t }}
+      </button>
+    }
+
+    <button
+      type="button"
+      class="filters__toggle"
+      (click)="toggleOpen()"
+      [attr.aria-expanded]="open()"
+      aria-controls="filter-panel"
+    >
+      {{ (open() ? 'filters.hide' : 'filters.show') | t }}
+      @if (activeCount() > 0) {
+        <span class="filters__badge">{{ activeCount() }}</span>
+      }
+    </button>
+  </div>
+
+  <div id="filter-panel" class="filters__panel">
+    @if (options(); as available) {
+      @if (!hasOptions()) {
+        <p class="filters__none">{{ 'filters.none' | t }}</p>
+      }
+
+      @if (available.conditions.length > 0) {
+        <fieldset class="filters__group">
+          <legend class="filters__legend">{{ 'filters.condition' | t }}</legend>
+
+          <ul class="filters__list">
+            @for (facet of available.conditions; track facet.value) {
+              <li>
+                <label class="filters__check">
+                  <input
+                    type="checkbox"
+                    [checked]="isChosen(facet.value)"
+                    (change)="toggleCondition(facet.value)"
+                  />
+                  <span class="filters__label">{{ facet.value | conditionLabel }}</span>
+                  <span class="filters__count">{{ facet.count }}</span>
+                </label>
+              </li>
+            }
+          </ul>
+        </fieldset>
+      }
+
+      @if (available.authors.length > 0) {
+        <fieldset class="filters__group">
+          <legend class="filters__legend">{{ 'filters.author' | t }}</legend>
+
+          <ul class="filters__list">
+            @for (facet of available.authors; track facet.slug) {
+              <li>
+                <button
+                  type="button"
+                  class="filters__option"
+                  [class.filters__option--on]="selection().author === facet.slug"
+                  [attr.aria-pressed]="selection().author === facet.slug"
+                  (click)="chooseAuthor(facet.slug)"
+                >
+                  <span class="filters__label">{{ facet.name | categoryName: facet.nameEn }}</span>
+                  <span class="filters__count">{{ facet.count }}</span>
+                </button>
+              </li>
+            }
+          </ul>
+        </fieldset>
+      }
+
+      @if (available.publishers.length > 0) {
+        <fieldset class="filters__group">
+          <legend class="filters__legend">{{ 'filters.publisher' | t }}</legend>
+
+          <ul class="filters__list">
+            @for (facet of available.publishers; track facet.slug) {
+              <li>
+                <button
+                  type="button"
+                  class="filters__option"
+                  [class.filters__option--on]="selection().publisher === facet.slug"
+                  [attr.aria-pressed]="selection().publisher === facet.slug"
+                  (click)="choosePublisher(facet.slug)"
+                >
+                  <span class="filters__label">{{ facet.name | categoryName: facet.nameEn }}</span>
+                  <span class="filters__count">{{ facet.count }}</span>
+                </button>
+              </li>
+            }
+          </ul>
+        </fieldset>
+      }
+
+      <!-- One language is not a choice, it is just what the catalogue is. -->
+      @if (available.languages.length > 1) {
+        <fieldset class="filters__group">
+          <legend class="filters__legend">{{ 'filters.language' | t }}</legend>
+
+          <ul class="filters__list">
+            @for (facet of available.languages; track facet.value) {
+              <li>
+                <button
+                  type="button"
+                  class="filters__option"
+                  [class.filters__option--on]="selection().language === facet.value"
+                  [attr.aria-pressed]="selection().language === facet.value"
+                  (click)="chooseLanguage(facet.value)"
+                >
+                  <span class="filters__label">{{ facet.value | languageLabel }}</span>
+                  <span class="filters__count">{{ facet.count }}</span>
+                </button>
+              </li>
+            }
+          </ul>
+        </fieldset>
+      }
+
+      @if (available.price; as price) {
+        <fieldset class="filters__group">
+          <legend class="filters__legend">
+            {{ 'filters.price' | t: { currency: available.currency } }}
+          </legend>
+
+          <div class="filters__range">
+            <label>
+              <span class="bs-visually-hidden">{{ 'filters.priceFrom' | t }}</span>
+              <input
+                type="number"
+                inputmode="numeric"
+                [value]="minPrice() ?? ''"
+                [attr.min]="price.min"
+                [attr.max]="price.max"
+                [attr.placeholder]="price.min"
+                (input)="minPrice.set(read($event))"
+              />
+            </label>
+
+            <span class="filters__dash" aria-hidden="true">–</span>
+
+            <label>
+              <span class="bs-visually-hidden">{{ 'filters.priceTo' | t }}</span>
+              <input
+                type="number"
+                inputmode="numeric"
+                [value]="maxPrice() ?? ''"
+                [attr.min]="price.min"
+                [attr.max]="price.max"
+                [attr.placeholder]="price.max"
+                (input)="maxPrice.set(read($event))"
+              />
+            </label>
+
+            <button type="button" class="filters__apply" (click)="applyPrice()">
+              {{ 'filters.apply' | t }}
+            </button>
+          </div>
+        </fieldset>
+      }
+
+      @if (available.years; as years) {
+        <fieldset class="filters__group">
+          <legend class="filters__legend">{{ 'filters.year' | t }}</legend>
+
+          <div class="filters__range">
+            <label>
+              <span class="bs-visually-hidden">{{ 'filters.yearFrom' | t }}</span>
+              <input
+                type="number"
+                inputmode="numeric"
+                [value]="minYear() ?? ''"
+                [attr.min]="years.min"
+                [attr.max]="years.max"
+                [attr.placeholder]="years.min"
+                (input)="minYear.set(read($event))"
+              />
+            </label>
+
+            <span class="filters__dash" aria-hidden="true">–</span>
+
+            <label>
+              <span class="bs-visually-hidden">{{ 'filters.yearTo' | t }}</span>
+              <input
+                type="number"
+                inputmode="numeric"
+                [value]="maxYear() ?? ''"
+                [attr.min]="years.min"
+                [attr.max]="years.max"
+                [attr.placeholder]="years.max"
+                (input)="maxYear.set(read($event))"
+              />
+            </label>
+
+            <button type="button" class="filters__apply" (click)="applyYears()">
+              {{ 'filters.apply' | t }}
+            </button>
+          </div>
+        </fieldset>
+      }
+    } @else {
+      <p class="filters__loading" aria-live="polite">{{ 'filters.loading' | t }}</p>
+    }
+  </div>
+</div>
