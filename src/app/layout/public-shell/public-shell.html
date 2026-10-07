@@ -30,8 +30,9 @@
           </a>
         </li>
         <li>
-          <!-- No contact page yet: the footer carries the platform's details. -->
-          <a [routerLink]="[]" fragment="contact" (click)="closeMenu()">{{ 'nav.contact' | t }}</a>
+          <a routerLink="/contact" routerLinkActive="nav__link--active" (click)="closeMenu()">
+            {{ 'nav.contact' | t }}
+          </a>
         </li>
 
         @if (auth.isMember()) {
@@ -182,15 +183,21 @@
   <router-outlet />
 </main>
 
-<footer id="contact" class="footer">
+<footer class="footer">
   <div class="bs-container footer__inner">
-    <section class="footer__block">
-      <h2 class="footer__title">{{ 'footer.about.title' | t }}</h2>
+    <section class="footer__about">
+      <a class="footer__brand" routerLink="/" dir="ltr">
+        <img class="footer__mark" src="preloader/preloader-logo.svg" alt="" width="162" height="244" />
+        <span class="footer__brand-text">
+          <span class="footer__brand-name">Vetanoia Store</span>
+          <span class="footer__brand-by">By Vetanoia Solutions</span>
+        </span>
+      </a>
       <p class="footer__text">{{ 'footer.about.text' | t }}</p>
     </section>
 
-    <section class="footer__block">
-      <h2 class="footer__title">{{ 'footer.links.title' | t }}</h2>
+    <section>
+      <h2 class="footer__title">{{ 'footer.market.title' | t }}</h2>
       <ul class="footer__list">
         <li><a routerLink="/books">{{ 'nav.books' | t }}</a></li>
         <li><a routerLink="/categories">{{ 'nav.categories' | t }}</a></li>
@@ -198,18 +205,34 @@
       </ul>
     </section>
 
-    <section class="footer__block">
-      <h2 class="footer__title">{{ 'footer.help.title' | t }}</h2>
+    <section>
+      <h2 class="footer__title">{{ 'footer.links.title' | t }}</h2>
       <ul class="footer__list">
-        <li><a routerLink="/how-it-works">{{ 'footer.help.howItWorks' | t }}</a></li>
-        <li><a routerLink="/support">{{ 'footer.help.support' | t }}</a></li>
+        <li><a routerLink="/">{{ 'nav.home' | t }}</a></li>
+        <li><a routerLink="/how-it-works">{{ 'nav.howItWorks' | t }}</a></li>
+        <li><a routerLink="/contact">{{ 'nav.contact' | t }}</a></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="footer__title">{{ 'footer.company.title' | t }}</h2>
+      <div class="footer__vendor" dir="ltr">
+        <span class="footer__vendor-logo">VETANOIA</span>
+        <span class="footer__vendor-text">
+          <span>{{ 'footer.company.solutionBy' | t }}</span>
+          <span>VETANOIA Solutions</span>
+        </span>
+      </div>
+      <ul class="footer__list">
+        <li><a routerLink="/contact">{{ 'footer.company.getInTouch' | t }}</a></li>
       </ul>
     </section>
   </div>
 
-  <p class="footer__rights">
-    © {{ currentYear }} {{ 'app.name' | t }}. {{ 'footer.rights' | t }}
-  </p>
+  <div class="bs-container footer__bottom">
+    <p>© {{ currentYear }} VETANOIA Solutions. {{ 'footer.rights' | t }}</p>
+    <p>Vetanoia Store — {{ 'footer.slogan' | t }}</p>
+  </div>
 </footer>
 
 <ui-toast-host />

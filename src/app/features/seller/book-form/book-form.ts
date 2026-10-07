@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
@@ -15,6 +15,7 @@ import { SeoService } from '../../../core/services/seo.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { UiErrorState, UiSkeleton } from '../../../shared/ui/state-views';
 import { UiStatusBadge } from '../../../shared/ui/status-badge';
+import { compressImage } from '../../../shared/utils/compress-image';
 
 /**
  * A category as the select shows it. The label already carries its indentation,
@@ -32,15 +33,41 @@ const GRADES: ConditionGrade[] = ['new', 'likeNew', 'veryGood', 'good', 'accepta
 /** The languages the platform lists books in. */
 const LANGUAGES: BookLanguage[] = ['arabic', 'english', 'french', 'german', 'turkish', 'other'];
 
+/** The cover and three more. The server holds the same limit. */
+const MAX_PHOTOS = 4;
+
+/** Largest photograph accepted, matching the server's limit. */
+const MAX_PHOTO_BYTES = 1024 * 1024;
+
+/** Longest edge kept, the size the server scales photographs down to anyway. */
+const MAX_PHOTO_EDGE = 1600;
+
+/** The image types the server can read. */
+const PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
+/**
+ * One line of the error summary. The form's own checks give translation keys; the
+ * server's messages arrive as text and are shown as they are.
+ */
+interface FormMessage {
+  text: string;
+  translate: boolean;
+}
+
+/** A photograph chosen for a new listing but not yet sent, with a preview to show it. */
+interface PendingPhoto {
+  file: File;
+  preview: string;
+}
+
 type State = 'loading' | 'ready' | 'error';
 
 /**
- * The one form a seller fills in about a copy, used both to start a draft and to
+ * The one form a seller fills in about a copy, used both to list a new one and to
  * correct one that came back rejected.
  *
- * Photographs are only offered once the draft exists, because a file has to be
- * attached to something. Creating the draft therefore navigates to its own address,
- * which also means a half-finished listing survives a closed tab.
+ * There is no draft. A new listing goes out in one request with its photographs and
+ * lands straight in review; saving the fix to a rejected listing sends it back.
  */
 @Component({
   selector: 'app-book-form',
@@ -71,6 +98,24 @@ export class BookForm implements OnInit {
 
   protected readonly grades = GRADES;
   protected readonly languages = LANGUAGES;
+  protected readonly maxPhotos = MAX_PHOTOS;
+  /**
+   * What the file picker offers. Wider than what the server reads, because anything
+   * else the browser can decode is converted to JPEG before it is sent.
+   */
+  protected readonly photoPicker = 'image/*,.heic,.heif';
+
+  /** Photographs chosen for a new listing. The first one is the cover. */
+  protected readonly pending = signal<PendingPhoto[]>([]);
+
+  /** A message about the photographs, shown under them. */
+  protected readonly photoError = signal<string | null>(null);
+
+  /** True while a chosen photograph is being shrunk. */
+  protected readonly preparing = signal(false);
+
+  /** Everything that stopped the last send, shown beside the send button. */
+  protected readonly formErrors = signal<FormMessage[]>([]);
 
   protected readonly state = signal<State>('loading');
   protected readonly book = signal<SellerBookDetails | null>(null);
@@ -78,7 +123,6 @@ export class BookForm implements OnInit {
 
   protected readonly saving = signal(false);
   protected readonly uploading = signal(false);
-  protected readonly recognising = signal(false);
 
   /** Validation messages from the server, keyed by the field they belong to. */
   protected readonly fieldErrors = signal<Record<string, string>>({});
@@ -88,7 +132,18 @@ export class BookForm implements OnInit {
   /** True while the listing is still the seller's to change. */
   protected readonly editable = computed(() => this.isNew() || (this.book()?.isEditable ?? false));
 
-  protected readonly canSubmit = computed(() => this.book()?.canSubmit ?? false);
+  /** Whether another photograph may be added, counting what is chosen or stored. */
+  protected readonly canAddPhoto = computed(() => {
+    const count = this.isNew() ? this.pending().length : (this.book()?.images.length ?? 0);
+    return count < MAX_PHOTOS;
+  });
+
+  constructor() {
+    // The previews are object URLs, which the browser keeps until they are released.
+    inject(DestroyRef).onDestroy(() =>
+      this.pending().forEach((photo) => URL.revokeObjectURL(photo.preview)),
+    );
+  }
 
   protected readonly form = this.builder.nonNullable.group({
     title: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(300)]],
@@ -99,10 +154,10 @@ export class BookForm implements OnInit {
     publisherName: [''],
     isbn: [''],
     publicationYear: [null as number | null],
-    pageCount: [null as number | null],
+    pageCount: [null as number | null, [Validators.required, Validators.min(1), Validators.max(20000)]],
     description: [''],
     condition: this.builder.nonNullable.group({
-      grade: ['veryGood' as ConditionGrade],
+      grade: ['veryGood' as ConditionGrade, [Validators.required]],
       coverCondition: ['veryGood' as ConditionGrade],
       pagesCondition: ['veryGood' as ConditionGrade],
       hasWritingInside: [false],
@@ -152,63 +207,79 @@ export class BookForm implements OnInit {
   }
 
   protected save(): void {
-    if (this.form.invalid || this.saving()) {
+    const code = this.publicId();
+    const [cover, ...photos] = this.pending().map((photo) => photo.file);
+    const missingCover = !code && !cover;
+
+    if (this.saving()) {
+      return;
+    }
+
+    if (missingCover) {
+      this.photoError.set('seller.form.photos.coverRequired');
+    }
+
+    if (this.form.invalid || missingCover) {
       this.form.markAllAsTouched();
+      this.formErrors.set(this.clientErrors(missingCover));
       return;
     }
 
     this.saving.set(true);
     this.fieldErrors.set({});
+    this.formErrors.set([]);
 
     const request = this.toRequest();
-    const code = this.publicId();
 
     const action = code
       ? this.seller.update(code, request)
-      : this.seller.create(request);
+      : this.seller.create(request, cover, photos);
 
     action.subscribe({
       next: (book) => {
         this.saving.set(false);
         this.book.set(book);
-        this.toasts.success(code ? 'seller.form.saved' : 'seller.form.created');
+        this.toasts.success('seller.books.submitted');
 
-        // A new draft moves to its own address, which is where photographs can be
-        // attached and where a reload will bring the seller back to.
-        if (!code) {
-          void this.router.navigate(['/seller/books', book.publicId]);
-        }
+        // A listing in review is no longer the seller's to change, so the list of
+        // their books is where they go next.
+        void this.router.navigate(['/seller/books']);
       },
       error: (error: unknown) => this.fail(error),
     });
   }
 
-  /** Sends the listing for review, or sends it again after a rejection. */
-  protected submitForReview(): void {
-    const code = this.publicId();
+  /** Adds a photograph to a new listing. Nothing is sent until the listing is. */
+  protected async choosePhotograph(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const chosen = input.files?.[0];
+    input.value = '';
 
-    if (!code || this.saving()) {
+    const file = chosen ? await this.prepare(chosen) : null;
+
+    if (!file) {
       return;
     }
 
-    this.saving.set(true);
+    this.pending.update((photos) => [...photos, { file, preview: URL.createObjectURL(file) }]);
+  }
 
-    this.seller.submit(code).subscribe({
-      next: (book) => {
-        this.saving.set(false);
-        this.book.set(book);
-        this.toasts.success('seller.books.submitted');
-      },
-      error: (error: unknown) => this.fail(error),
+  /** Drops a chosen photograph. Removing the first makes the next one the cover. */
+  protected removePending(index: number): void {
+    this.pending.update((photos) => {
+      URL.revokeObjectURL(photos[index].preview);
+      return photos.filter((_, position) => position !== index);
     });
   }
 
-  protected addPhotograph(event: Event): void {
+  protected async addPhotograph(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
+    const chosen = input.files?.[0];
     const code = this.publicId();
+    const file = chosen && code ? await this.prepare(chosen) : null;
 
     if (!file || !code) {
+      input.value = '';
       return;
     }
 
@@ -246,46 +317,46 @@ export class BookForm implements OnInit {
   }
 
   /**
-   * Reads a photograph of the cover and fills in what it recognised. Every field it
-   * suggests is left editable and nothing is saved: the seller is the one who knows
-   * which edition is in their hands.
+   * Gets a photograph ready to send under the server's rules. A large photograph is
+   * shrunk here rather than refused, and one the server cannot read (an iPhone HEIC,
+   * say) is converted to JPEG when the browser can decode it. Returns null, with a
+   * message for the seller, when the photograph cannot be used.
    */
-  protected recognise(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
+  private async prepare(file: File): Promise<File | null> {
+    this.photoError.set(null);
 
-    if (!file) {
-      return;
+    if (!this.canAddPhoto()) {
+      this.photoError.set('seller.form.photos.tooMany');
+      return null;
     }
 
-    this.recognising.set(true);
+    if (!file.type.startsWith('image/') && !/\.(heic|heif)$/i.test(file.name)) {
+      this.photoError.set('seller.form.photos.badType');
+      return null;
+    }
 
-    this.seller.recognize(file).subscribe({
-      next: (result) => {
-        this.recognising.set(false);
-        input.value = '';
+    this.preparing.set(true);
 
-        this.form.patchValue({
-          title: result.title ?? this.form.controls.title.value,
-          authorName: result.authorName ?? this.form.controls.authorName.value,
-          publisherName: result.publisherName ?? this.form.controls.publisherName.value,
-          isbn: result.isbn ?? this.form.controls.isbn.value,
-          publicationYear: result.publicationYear ?? this.form.controls.publicationYear.value,
-        });
-
-        this.toasts.info('seller.form.recognised');
-      },
-      error: (error: unknown) => {
-        this.recognising.set(false);
-        input.value = '';
-        this.fail(error);
-      },
-    });
+    try {
+      return await compressImage(file, {
+        maxBytes: MAX_PHOTO_BYTES,
+        maxEdge: MAX_PHOTO_EDGE,
+        acceptedTypes: PHOTO_TYPES,
+      });
+    } catch {
+      // Either the browser cannot decode it, or it would not shrink far enough.
+      this.photoError.set(
+        PHOTO_TYPES.includes(file.type) ? 'seller.form.photos.tooLarge' : 'seller.form.photos.badType',
+      );
+      return null;
+    } finally {
+      this.preparing.set(false);
+    }
   }
 
   /** The category name in the reader's language. */
   private label(node: CategoryNode): string {
-    return this.translations.language() === 'ar' ? node.nameAr : node.nameEn;
+    return this.translations.language() === 'ar' ? node.nameAr : node.nameEn || node.nameAr;
   }
 
   private loadCategories(): void {
@@ -349,7 +420,7 @@ export class BookForm implements OnInit {
       authorName: this.trimmed(value.authorName),
       publisherName: this.trimmed(value.publisherName),
       publicationYear: value.publicationYear ? Number(value.publicationYear) : null,
-      pageCount: value.pageCount ? Number(value.pageCount) : null,
+      pageCount: Number(value.pageCount),
       condition: {
         ...value.condition,
         otherDamage: this.trimmed(value.condition.otherDamage),
@@ -373,10 +444,34 @@ export class BookForm implements OnInit {
     if (error instanceof ApiRequestError) {
       this.fieldErrors.set(error.fieldErrors);
       this.toasts.failure(error.message);
+
+      // Every message the server sent, including those for fields the form has no
+      // place for, such as the photographs.
+      const messages = [...new Set(error.errors.map((item) => item.message).filter(Boolean))];
+      this.formErrors.set(
+        (messages.length > 0 ? messages : [error.message]).map((text) => ({ text, translate: false })),
+      );
       return;
     }
 
     this.toasts.error('common.error');
+    this.formErrors.set([{ text: 'common.error', translate: true }]);
+  }
+
+  /** What is still missing or wrong, for the summary beside the send button. */
+  private clientErrors(missingCover: boolean): FormMessage[] {
+    const controls = this.form.controls;
+    const checks: [boolean, string][] = [
+      [controls.title.invalid, 'seller.form.error.titleRequired'],
+      [controls.categorySlug.invalid, 'seller.form.error.category'],
+      [controls.price.invalid, 'seller.form.error.price'],
+      [controls.pageCount.invalid, 'seller.form.error.pages'],
+      [missingCover, 'seller.form.photos.coverRequired'],
+    ];
+
+    return checks
+      .filter(([failed]) => failed)
+      .map(([, key]) => ({ text: key, translate: true }));
   }
 
   private trimmed(value: string): string | null {

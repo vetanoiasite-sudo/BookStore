@@ -2,6 +2,8 @@ import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, map, throwError } from 'rxjs';
 import { APP_CONFIG } from '../config/app-config';
+import { translateServerMessage } from '../i18n/server-messages';
+import { TranslationService } from '../i18n/translation.service';
 import type { ApiResponse } from '../models/api-response';
 import { ApiRequestError } from './api-error';
 
@@ -20,6 +22,7 @@ export type QueryParams = Record<
 export class ApiClient {
   private readonly http = inject(HttpClient);
   private readonly config = inject(APP_CONFIG);
+  private readonly translations = inject(TranslationService);
 
   get<T>(path: string, params?: QueryParams): Observable<T> {
     return this.unwrap(
@@ -99,11 +102,21 @@ export class ApiClient {
         }
         return response.data as T;
       }),
-      catchError((error: unknown) =>
-        throwError(() =>
-          error instanceof HttpErrorResponse ? ApiRequestError.fromHttp(error) : error,
-        ),
-      ),
+      catchError((error: unknown) => {
+        const failure = error instanceof HttpErrorResponse ? ApiRequestError.fromHttp(error) : error;
+        return throwError(() => (failure instanceof ApiRequestError ? this.localise(failure) : failure));
+      }),
+    );
+  }
+
+  /** Puts the server's English messages into the interface language, top-level and per field. */
+  private localise(error: ApiRequestError): ApiRequestError {
+    const language = this.translations.language();
+
+    return new ApiRequestError(
+      translateServerMessage(error.message, language),
+      error.status,
+      error.errors.map((item) => ({ ...item, message: translateServerMessage(item.message, language) })),
     );
   }
 }

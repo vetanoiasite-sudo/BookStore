@@ -141,15 +141,3 @@ export interface SellerDashboard {
   ratingCount: number;
   recent: SellerBookListItem[];
 }
-
-/** What the recogniser thinks it saw on a cover. */
-export interface BookRecognitionResult {
-  title: string | null;
-  authorName: string | null;
-  publisherName: string | null;
-  isbn: string | null;
-  publicationYear: number | null;
-  language: string | null;
-  confidence: number;
-  provider: string;
-}

@@ -1,0 +1,67 @@
+.contact {
+  padding-block: var(--bs-space-6) var(--bs-space-8);
+}
+
+.contact__header {
+  margin-block-end: var(--bs-space-6);
+  padding-block-end: var(--bs-space-4);
+  border-block-end: 1px solid var(--bs-border);
+}
+
+.contact__title {
+  margin: 0;
+  font-family: var(--bs-font-serif);
+  font-size: var(--bs-text-2xl);
+}
+
+.contact__lead {
+  margin: var(--bs-space-2) 0 0;
+  max-width: 60ch;
+  color: var(--bs-text-muted);
+}
+
+.contact__card {
+  max-width: 30rem;
+  padding: var(--bs-space-5) var(--bs-space-6);
+  border: 1px solid var(--bs-border);
+  border-radius: 12px;
+  background: var(--bs-surface);
+  box-shadow: var(--bs-shadow-sm);
+}
+
+.contact__card-title {
+  margin: 0 0 var(--bs-space-4);
+  font-size: var(--bs-text-base);
+  font-weight: 700;
+}
+
+.contact__list {
+  display: grid;
+  gap: var(--bs-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.contact__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bs-space-2);
+}
+
+.contact__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 1.5rem;
+  color: var(--bs-primary);
+}
+
+.contact__label {
+  font-weight: 700;
+}
+
+.contact__value {
+  color: var(--bs-primary);
+  overflow-wrap: anywhere;
+}

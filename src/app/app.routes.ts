@@ -176,6 +176,10 @@ export const routes: Routes = [
           import('./features/how-it-works/how-it-works').then((m) => m.HowItWorks),
       },
       {
+        path: 'contact',
+        loadComponent: () => import('./features/contact/contact').then((m) => m.Contact),
+      },
+      {
         // The basket and the saved list belong to an account, so an anonymous
         // visitor is sent to sign in and brought straight back here afterwards.
         path: 'cart',

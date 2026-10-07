@@ -54,19 +54,10 @@
   }
 }
 
-.assist {
-  padding: var(--bs-space-3);
-  border: 1px dashed var(--bs-border-strong);
-  border-radius: var(--bs-radius-md);
-  background: var(--bs-surface-muted);
-
-  .bs-hint {
-    margin-block-start: var(--bs-space-2);
-  }
-}
-
-.assist__button {
-  cursor: pointer;
+// Marks the fields a listing cannot be saved without.
+.required::after {
+  content: ' *';
+  color: var(--bs-danger);
 }
 
 .condition-title {
@@ -88,8 +79,22 @@
 .actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: flex-start;
   gap: var(--bs-space-3);
   margin-block-start: var(--bs-space-2);
+}
+
+// What stopped the last send, beside the button that was pressed.
+.actions__errors {
+  flex: 1 1 16rem;
+  margin: 0;
+  padding: var(--bs-space-2) var(--bs-space-3);
+  padding-inline-start: var(--bs-space-5);
+  border: 1px solid var(--bs-danger);
+  border-radius: var(--bs-radius-md);
+  color: var(--bs-danger);
+  font-size: var(--bs-text-sm);
+  list-style: disc;
 }
 
 .side {
