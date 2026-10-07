@@ -32,6 +32,9 @@ export class Register {
 
   protected readonly submitting = signal(false);
 
+  /** Whether the password is shown as plain text, toggled by the eye button. */
+  protected readonly showPassword = signal(false);
+
   protected readonly failure = signal<string | null>(null);
 
   /** Validation messages from the server, keyed by field name. */

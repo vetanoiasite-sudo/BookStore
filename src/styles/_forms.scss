@@ -24,6 +24,40 @@
   font-weight: 600;
 }
 
+// A password input with an eye button inside it that shows or hides what was typed.
+.bs-password {
+  position: relative;
+
+  .bs-input {
+    padding-inline-end: 2.75rem;
+  }
+}
+
+.bs-password__toggle {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--bs-text-muted);
+  cursor: pointer;
+
+  &:hover,
+  &[aria-pressed='true'] {
+    color: var(--bs-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: -4px;
+    border-radius: var(--bs-radius-sm);
+  }
+}
+
 .bs-hint {
   margin: 0;
   font-size: var(--bs-text-xs);

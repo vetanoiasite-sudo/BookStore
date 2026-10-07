@@ -23,14 +23,32 @@
 
   <div class="bs-field">
     <label class="bs-label" for="password">{{ 'auth.password' | t }}</label>
-    <input
-      id="password"
-      class="bs-input"
-      type="password"
-      autocomplete="current-password"
-      formControlName="password"
-      [attr.aria-invalid]="form.controls.password.touched && form.controls.password.invalid"
-    />
+    <div class="bs-password">
+      <input
+        id="password"
+        class="bs-input"
+        [type]="showPassword() ? 'text' : 'password'"
+        autocomplete="current-password"
+        formControlName="password"
+        [attr.aria-invalid]="form.controls.password.touched && form.controls.password.invalid"
+      />
+      <button
+        type="button"
+        class="bs-password__toggle"
+        (click)="showPassword.set(!showPassword())"
+        [attr.aria-pressed]="showPassword()"
+        [attr.aria-label]="(showPassword() ? 'auth.hidePassword' : 'auth.showPassword') | t"
+        [attr.title]="(showPassword() ? 'auth.hidePassword' : 'auth.showPassword') | t"
+      >
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" stroke-linejoin="round" />
+          <circle cx="12" cy="12" r="3" />
+          @if (showPassword()) {
+            <path d="M4 4l16 16" stroke-linecap="round" />
+          }
+        </svg>
+      </button>
+    </div>
     @if (form.controls.password.touched && form.controls.password.invalid) {
       <p class="bs-error">{{ 'auth.error.passwordRequired' | t }}</p>
     }

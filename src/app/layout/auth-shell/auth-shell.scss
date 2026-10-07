@@ -1,52 +1,169 @@
+@use 'mixins' as m;
+@use 'tokens' as t;
+
+// Two thirds photo, one third form. Grid order follows the reading direction, so in
+// Arabic the photo sits on the right and the form on the left.
 .auth {
+  display: grid;
   min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--bs-surface);
+
+  @include m.from(t.$bs-bp-lg) {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+// --- Photo ----------------------------------------------------------------
+
+.auth__visual {
+  position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  justify-content: space-between;
   gap: var(--bs-space-5);
-  padding: var(--bs-space-6) var(--bs-space-4);
-  background: var(--bs-bg);
+  min-height: 13rem;
+  padding: var(--bs-space-6);
+  overflow: hidden;
+  background: linear-gradient(var(--bs-scrim) 0 0), var(--bs-primary-light);
+  color: var(--bs-text-inverse);
+
+  @include m.from(t.$bs-bp-lg) {
+    // Held in place while a long form (registering) scrolls beside it.
+    position: sticky;
+    inset-block-start: 0;
+    height: 100vh;
+    height: 100dvh;
+    padding: var(--bs-space-7);
+  }
+
+  // A darker foot so the tagline reads on any photo.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      transparent 45%,
+      color-mix(in srgb, var(--bs-ink-deep) 80%, transparent)
+    );
+    pointer-events: none;
+  }
+}
+
+// The scheme's scrim is baked into the photo, as on the home hero.
+.auth__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.auth__brand {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bs-space-3);
+  align-self: flex-start;
+  color: var(--bs-text-inverse);
+
+  &:hover {
+    color: var(--bs-text-inverse);
+    text-decoration: none;
+  }
+}
+
+.auth__mark {
+  display: block;
+  width: auto;
+  height: 3.75rem;
+}
+
+.auth__brand-name {
+  font-family: var(--bs-font-display);
+  font-size: var(--bs-text-2xl);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+}
+
+.auth__tagline {
+  position: relative;
+  z-index: 1;
+  max-width: 34rem;
+  margin: 0;
+  color: var(--bs-highlight);
+  font-family: var(--bs-font-display);
+  font-size: clamp(var(--bs-text-xl), 1rem + 1.6vw, 2.75rem);
+  font-weight: 700;
+  line-height: 1.15;
+  text-transform: uppercase;
+
+  // On a phone the strip is short; the brand alone carries it.
+  @include m.until(t.$bs-bp-md) {
+    display: none;
+  }
+}
+
+// --- Form -----------------------------------------------------------------
+
+.auth__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bs-space-6);
+  padding: var(--bs-space-5) var(--bs-space-4) var(--bs-space-7);
+
+  @include m.from(t.$bs-bp-lg) {
+    padding: var(--bs-space-6) clamp(var(--bs-space-6), 3vw, var(--bs-space-8));
+  }
 }
 
 .auth__header {
-  width: 100%;
-  max-width: 28rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--bs-space-3);
 }
 
-.auth__brand {
-  font-weight: 700;
-  font-size: var(--bs-text-lg);
-  color: var(--bs-primary);
+.auth__back {
+  color: var(--bs-text-muted);
+  font-size: var(--bs-text-sm);
+
+  &:hover {
+    color: var(--bs-primary);
+  }
 }
 
 .auth__language {
-  border: 1px solid var(--bs-border);
-  border-radius: var(--bs-radius-pill);
-  background: none;
-  padding: 0.2rem var(--bs-space-3);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bs-space-2);
+  padding: var(--bs-space-2);
+  border: 0;
+  background: transparent;
+  color: var(--bs-text-muted);
   font-size: var(--bs-text-sm);
   cursor: pointer;
 
   &:hover {
-    border-color: var(--bs-border-strong);
+    color: var(--bs-primary);
   }
 }
 
-.auth__card {
-  width: 100%;
-  max-width: 28rem;
-  padding: var(--bs-space-6);
-  border: 1px solid var(--bs-border);
-  border-radius: var(--bs-radius-lg);
-  background: var(--bs-surface);
-  box-shadow: var(--bs-shadow-sm);
+.auth__flag {
+  display: block;
+  width: 1.5rem;
+  height: 1rem;
+  border-radius: var(--bs-radius-sm);
+  object-fit: cover;
+  box-shadow: 0 0 0 1px var(--bs-border);
 }
 
-.auth__back {
-  margin: 0;
-  font-size: var(--bs-text-sm);
+// The form centres in its third, at a comfortable reading width.
+.auth__form {
+  width: 100%;
+  max-width: 26rem;
+  margin: auto;
 }

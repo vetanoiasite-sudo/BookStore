@@ -29,6 +29,9 @@ export class Login {
 
   protected readonly submitting = signal(false);
 
+  /** Whether the password is shown as plain text, toggled by the eye button. */
+  protected readonly showPassword = signal(false);
+
   /** What the server said, when it refused. Already in the reader's language. */
   protected readonly failure = signal<string | null>(null);
 

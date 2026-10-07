@@ -2,38 +2,61 @@ import { Component, inject } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { TranslationService } from '../../core/i18n/translation.service';
+import { ThemeService } from '../../core/services/theme.service';
 import { UiToastHost } from '../../shared/ui/toast-host';
 
 /**
- * The frame around signing in and signing up. Deliberately bare: the storefront
- * header offers a search box and a catalogue, and neither is what someone in the
- * middle of signing in came for.
+ * The frame around signing in and signing up: a hero photo across two thirds of the
+ * screen and the form in the remaining third. Deliberately bare otherwise, since the
+ * storefront's search and catalogue are not what someone signing in came for.
  */
 @Component({
   selector: 'auth-shell',
   imports: [RouterOutlet, RouterLink, TranslatePipe, UiToastHost],
   template: `
     <div class="auth">
-      <header class="auth__header">
-        <a class="auth__brand" routerLink="/">{{ 'app.name' | t }}</a>
+      <aside class="auth__visual">
+        <img class="auth__photo" [src]="theme.asset('hero/slide-2.webp')" alt="" />
 
-        <button
-          type="button"
-          class="auth__language"
-          (click)="switchLanguage()"
-          [attr.aria-label]="'nav.languageLabel' | t"
-        >
-          {{ 'nav.language' | t }}
-        </button>
-      </header>
+        <a class="auth__brand" routerLink="/" dir="ltr">
+          <img
+            class="auth__mark"
+            [src]="theme.asset('preloader/preloader-logo.svg')"
+            alt=""
+            width="162"
+            height="244"
+          />
+          <span class="auth__brand-name">Vetanoia Store</span>
+        </a>
 
-      <main class="auth__card">
-        <router-outlet />
-      </main>
+        <p class="auth__tagline">{{ 'app.tagline' | t }}</p>
+      </aside>
 
-      <p class="auth__back">
-        <a routerLink="/">{{ 'auth.backToStorefront' | t }}</a>
-      </p>
+      <section class="auth__panel">
+        <header class="auth__header">
+          <a class="auth__back" routerLink="/">{{ 'auth.backToStorefront' | t }}</a>
+
+          <button
+            type="button"
+            class="auth__language"
+            (click)="switchLanguage()"
+            [attr.aria-label]="'nav.languageLabel' | t"
+          >
+            <img
+              class="auth__flag"
+              [src]="translations.language() === 'ar' ? 'flags/gb.svg' : 'flags/eg.svg'"
+              alt=""
+              width="24"
+              height="16"
+            />
+            <span>{{ 'nav.language' | t }}</span>
+          </button>
+        </header>
+
+        <main class="auth__form">
+          <router-outlet />
+        </main>
+      </section>
     </div>
 
     <ui-toast-host />
@@ -41,7 +64,8 @@ import { UiToastHost } from '../../shared/ui/toast-host';
   styleUrl: './auth-shell.scss',
 })
 export class AuthShell {
-  private readonly translations = inject(TranslationService);
+  protected readonly translations = inject(TranslationService);
+  protected readonly theme = inject(ThemeService);
 
   protected async switchLanguage(): Promise<void> {
     await this.translations.toggle();
