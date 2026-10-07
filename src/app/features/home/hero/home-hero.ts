@@ -15,6 +15,7 @@ import { gsap } from 'gsap';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { TranslationService } from '../../../core/i18n/translation.service';
 import { PageReveal } from '../../../core/services/page-reveal.service';
+import { ThemeService } from '../../../core/services/theme.service';
 
 /** How long each photo stays before the next one lifts in. */
 const SLIDE_SECONDS = 6;
@@ -43,6 +44,7 @@ type Direction = 'up' | 'down';
 export class HomeHero {
   private readonly translations = inject(TranslationService);
   private readonly reveal = inject(PageReveal);
+  protected readonly theme = inject(ThemeService);
 
   protected readonly slides = [1, 2, 3, 4, 5].map((n) => `hero/slide-${n}.webp`);
   protected readonly active = signal(0);
@@ -209,7 +211,7 @@ export class HomeHero {
     const words = this.title().nativeElement.querySelectorAll('.hero__word-inner');
     this.ctx.add(() => {
       gsap
-        .timeline({ delay: 0.55, defaults: { ease: 'expo.out', duration: 1.1 } })
+        .timeline({ delay: 1.2, defaults: { ease: 'expo.out', duration: 1.1 } })
         .set(this.introTargets(), { autoAlpha: 1 })
         .from(words, { yPercent: 110, duration: 1, stagger: 0.045 }, 0)
         // fromTo, because the paragraph was hidden as a whole before the first paint.

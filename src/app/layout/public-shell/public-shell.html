@@ -3,7 +3,7 @@
 <header class="header">
   <div class="bs-container header__bar">
     <a class="brand" routerLink="/" (click)="closeMenu()" dir="ltr">
-      <img class="brand__mark" src="preloader/preloader-logo.svg" alt="" width="162" height="244" />
+      <img class="brand__mark" [src]="theme.asset('preloader/preloader-logo.svg')" alt="" width="162" height="244" />
       <span class="brand__name">Vetanoia Store</span>
     </a>
 
@@ -59,6 +59,15 @@
           <a class="header__cta" routerLink="/auth/register" (click)="closeMenu()">{{ 'nav.registerNow' | t }}</a>
           <a class="header__outline" routerLink="/auth/login" (click)="closeMenu()">{{ 'nav.signIn' | t }}</a>
         }
+        <button
+          type="button"
+          class="header__theme"
+          (click)="theme.toggle()"
+          [attr.aria-label]="'nav.theme' | t"
+          [attr.title]="'nav.theme' | t"
+        >
+          <span class="header__swatch" [class.header__swatch--purple]="theme.theme() === 'brown'" aria-hidden="true"></span>
+        </button>
         <button type="button" class="header__language" (click)="switchLanguage()" [attr.aria-label]="'nav.languageLabel' | t">
           <img class="header__flag" [src]="translations.language() === 'ar' ? 'flags/gb.svg' : 'flags/eg.svg'" alt="" width="24" height="16" />
           <span>{{ 'nav.language' | t }}</span>
@@ -81,7 +90,6 @@
           <path d="m20 20-3.5-3.5" stroke-linecap="round" />
         </svg>
       </button>
-
       @if (auth.isMember()) {
         <a
           class="header__icon"
@@ -100,7 +108,6 @@
             <span class="header__badge">{{ saved }}</span>
           }
         </a>
-
         <a
           class="header__icon"
           routerLink="/cart"
@@ -118,7 +125,6 @@
           }
         </a>
       }
-
       <div class="header__account">
         @if (auth.isAuthenticated()) {
           @if (auth.isMember()) {
@@ -132,6 +138,15 @@
           <a class="header__cta" routerLink="/auth/register">{{ 'nav.registerNow' | t }}</a>
           <a class="header__outline" routerLink="/auth/login">{{ 'nav.signIn' | t }}</a>
         }
+        <button
+          type="button"
+          class="header__theme"
+          (click)="theme.toggle()"
+          [attr.aria-label]="'nav.theme' | t"
+          [attr.title]="'nav.theme' | t"
+        >
+          <span class="header__swatch" [class.header__swatch--purple]="theme.theme() === 'brown'" aria-hidden="true"></span>
+        </button>
 
         <button type="button" class="header__language" (click)="switchLanguage()" [attr.aria-label]="'nav.languageLabel' | t">
           <img class="header__flag" [src]="translations.language() === 'ar' ? 'flags/gb.svg' : 'flags/eg.svg'" alt="" width="24" height="16" />

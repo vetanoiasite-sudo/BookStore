@@ -2,37 +2,40 @@
 // variables rather than raw colour or spacing values.
 
 :root {
-  // Palette borrowed from SuperPark: a deep purple brand, a neon yellow highlight
-  // that only ever sits on purple or plum, and near-black plum for heavy surfaces.
+  // Bookshop palette (createmor "Squarespace" set): Spiced Wine for the brand,
+  // Cowhide Cocoa for text and heavy blocks, Toasted Caramel as the accent, Golden
+  // Batter as the highlight, and Olive Harvest for non-text marks only (it is too
+  // light to carry text on any surface here). Pages sit on a paler Golden Batter.
 
   // Surfaces
-  --bs-bg: #f5f7f7;
+  --bs-bg: #faf4e8;
   --bs-surface: #ffffff;
-  --bs-surface-muted: #f0f0f0;
+  --bs-surface-muted: #f2e6ce;
 
   // Text
-  --bs-text: #22182c;
-  --bs-text-muted: #50525b;
+  --bs-text: #442d1c;
+  --bs-text-muted: #6b5442;
   --bs-text-inverse: #ffffff;
 
   // Brand
-  --bs-primary: #662483;
-  --bs-primary-hover: #47195b;
-  --bs-primary-soft: #f1e6f6;
-  --bs-primary-light: #6a2788;
-  --bs-accent: #662483;
-  --bs-accent-soft: #f1e6f6;
+  --bs-primary: #743014;
+  --bs-primary-hover: #442d1c;
+  --bs-primary-soft: #f6e8df;
+  --bs-primary-light: #84592b;
+  --bs-accent: #84592b;
+  --bs-accent-soft: #f3e7d6;
+  --bs-olive: #9d9167;
 
-  // The neon yellow. Text on it is always --bs-ink; never use it as text on white.
-  --bs-highlight: #f0ff00;
-  --bs-highlight-hover: #f3ff33;
+  // Golden Batter. Text on it is always --bs-ink; never use it as text on white.
+  --bs-highlight: #e8d1a7;
+  --bs-highlight-hover: #f0dfbf;
 
-  // Dark plum used by the footer, the mobile menu and other heavy blocks.
-  --bs-ink: #22182c;
-  --bs-ink-deep: #200d28;
+  // Cowhide Cocoa, and a deeper cut of it for the footer.
+  --bs-ink: #442d1c;
+  --bs-ink-deep: #2e1e12;
   --bs-mint: #2ae2a3;
-  // Plum veil laid over brand purple to darken full-bleed imagery (the preloader).
-  --bs-scrim: rgb(19 4 32 / 50%);
+  // Cocoa veil laid over the caramel base to darken full-bleed imagery.
+  --bs-scrim: rgb(36 23 14 / 50%);
 
   // Feedback
   --bs-success: #117c57;
@@ -41,12 +44,18 @@
   --bs-info: #2f5f7d;
 
   // Lines and depth
-  --bs-border: #e4e4e4;
-  --bs-border-strong: #cccccc;
-  --bs-shadow-sm: 0 1px 4px rgb(0 0 0 / 10%);
-  --bs-shadow-md: 0 6px 18px rgb(34 24 44 / 12%);
-  --bs-shadow-lg: 0 14px 34px rgb(34 24 44 / 16%);
-  --bs-shadow-header: 0 4px 1px rgb(102 102 102 / 20%);
+  --bs-border: #e8dcc4;
+  --bs-border-strong: #cfbd9a;
+  --bs-shadow-sm: 0 1px 4px rgb(68 45 28 / 10%);
+  --bs-shadow-md: 0 6px 18px rgb(68 45 28 / 12%);
+  --bs-shadow-lg: 0 14px 34px rgb(68 45 28 / 16%);
+  --bs-shadow-header: 0 4px 1px rgb(68 45 28 / 15%);
+
+  // Fixed previews of each scheme for the switch; not overridden by either theme.
+  --bs-swatch-brown: #743014;
+  --bs-swatch-brown-alt: #e8d1a7;
+  --bs-swatch-purple: #662483;
+  --bs-swatch-purple-alt: #f0ff00;
 
   // Spacing scale (4px base)
   --bs-space-1: 0.25rem;
@@ -82,6 +91,42 @@
   --bs-header-height: 70px;
 
   --bs-transition: 200ms ease;
+}
+
+// The original scheme, kept as a switchable alternative: deep purple brand, neon
+// yellow highlight that only sits on purple or plum, and near-black plum for heavy
+// surfaces. Only colours change; spacing, type and layout are shared.
+:root[data-theme='purple'] {
+  --bs-bg: #f5f7f7;
+  --bs-surface: #ffffff;
+  --bs-surface-muted: #f0f0f0;
+
+  --bs-text: #22182c;
+  --bs-text-muted: #50525b;
+  --bs-text-inverse: #ffffff;
+
+  --bs-primary: #662483;
+  --bs-primary-hover: #47195b;
+  --bs-primary-soft: #f1e6f6;
+  --bs-primary-light: #6a2788;
+  --bs-accent: #662483;
+  --bs-accent-soft: #f1e6f6;
+  // The nav underline was brand purple in this scheme.
+  --bs-olive: #662483;
+
+  --bs-highlight: #f0ff00;
+  --bs-highlight-hover: #f3ff33;
+
+  --bs-ink: #22182c;
+  --bs-ink-deep: #200d28;
+  --bs-scrim: rgb(19 4 32 / 50%);
+
+  --bs-border: #e4e4e4;
+  --bs-border-strong: #cccccc;
+  --bs-shadow-sm: 0 1px 4px rgb(0 0 0 / 10%);
+  --bs-shadow-md: 0 6px 18px rgb(34 24 44 / 12%);
+  --bs-shadow-lg: 0 14px 34px rgb(34 24 44 / 16%);
+  --bs-shadow-header: 0 4px 1px rgb(102 102 102 / 20%);
 }
 
 // SCSS breakpoints, used with the mixins below.

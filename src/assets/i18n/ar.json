@@ -17,6 +17,7 @@
   "nav.cart": "السلة",
   "nav.language": "English",
   "nav.languageLabel": "تغيير اللغة",
+  "nav.theme": "تغيير ألوان الموقع",
   "search.placeholder": "ابحث عن عنوان، مؤلف أو ISBN",
   "search.submit": "ابحث",
   "search.resultsFor": "نتائج البحث عن \"{term}\"",

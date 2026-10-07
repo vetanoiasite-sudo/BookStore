@@ -5,6 +5,7 @@ import { TranslationService } from '../../core/i18n/translation.service';
 import { AuthService } from '../../core/services/auth.service';
 import { CartService } from '../../core/services/cart.service';
 import { FavoriteService } from '../../core/services/favorite.service';
+import { ThemeService } from '../../core/services/theme.service';
 import { UiToastHost } from '../../shared/ui/toast-host';
 
 /**
@@ -22,6 +23,7 @@ export class PublicShell {
 
   protected readonly auth = inject(AuthService);
   protected readonly translations = inject(TranslationService);
+  protected readonly theme = inject(ThemeService);
 
   /** Both are signals, so the header counts follow a change made anywhere else. */
   protected readonly cart = inject(CartService);

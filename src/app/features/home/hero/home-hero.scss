@@ -94,6 +94,17 @@
   max-width: calc(47.625rem + 2 * var(--bs-space-6));
   padding: var(--bs-space-7) var(--bs-space-6);
   text-align: center;
+
+  // A soft cocoa pool behind the copy, so the lead keeps 4.5:1 over the brightest
+  // parts of any photo while the edges of the image stay clear.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -15% -25%;
+    z-index: -1;
+    background: radial-gradient(closest-side, var(--bs-scrim), transparent);
+    pointer-events: none;
+  }
 }
 
 .hero__title {

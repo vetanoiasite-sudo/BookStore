@@ -15,7 +15,7 @@
         <div class="hero__stage">
           <img
             class="hero__image"
-            [src]="slide"
+            [src]="theme.asset(slide)"
             alt=""
             [attr.fetchpriority]="i === 0 ? 'high' : null"
             [attr.loading]="i === 0 ? 'eager' : 'lazy'"

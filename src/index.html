@@ -9,8 +9,18 @@
       name="description"
       content="منصة لبيع وشراء الكتب المستعملة، تدير عملية البيع بالكامل بين البائع والمشتري."
     />
-    <meta name="theme-color" content="#662483" />
+    <meta name="theme-color" content="#743014" />
     <link rel="icon" type="image/svg+xml" href="logo.svg" />
+    <script>
+      // Apply the saved colour scheme before first paint, so the page never flashes
+      // the other one. ThemeService takes over once the app boots.
+      try {
+        if (localStorage.getItem('bookstore.theme') === 'purple') {
+          document.documentElement.dataset.theme = 'purple';
+          document.querySelector('link[rel="icon"]').href = 'logo-purple.svg';
+        }
+      } catch {}
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

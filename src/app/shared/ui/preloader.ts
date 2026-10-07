@@ -11,9 +11,10 @@ import { NavigationCancel, NavigationEnd, NavigationError, Router } from '@angul
 import { filter, firstValueFrom } from 'rxjs';
 import { gsap } from 'gsap';
 import { PageReveal } from '../../core/services/page-reveal.service';
+import { ThemeService } from '../../core/services/theme.service';
 
 /** The shortest time the brand lockup stays on screen, so a fast load never just flickers. */
-const MIN_HOLD_MS = 1400;
+const MIN_HOLD_MS = 2600;
 /** A slow background image must never hold the site hostage. */
 const IMAGE_TIMEOUT_MS = 4000;
 /** How much of the curtain's travel the inner stage cancels out; the rest reads as parallax. */
@@ -43,7 +44,7 @@ const blockScrollKeys = (e: KeyboardEvent) => {
           <img
             #backdrop
             class="preloader__backdrop"
-            src="preloader/preloader-bg.webp"
+            [src]="theme.asset('preloader/preloader-bg.webp')"
             alt=""
             decoding="async"
             fetchpriority="high"
@@ -51,7 +52,7 @@ const blockScrollKeys = (e: KeyboardEvent) => {
           <div #lockup class="preloader__lockup" dir="ltr">
             <img
               class="preloader__logo"
-              src="preloader/preloader-logo.svg"
+              [src]="theme.asset('preloader/preloader-logo.svg')"
               width="162"
               height="244"
               alt=""
@@ -67,6 +68,7 @@ const blockScrollKeys = (e: KeyboardEvent) => {
 export class UiPreloader {
   private readonly router = inject(Router);
   private readonly reveal = inject(PageReveal);
+  protected readonly theme = inject(ThemeService);
 
   protected readonly visible = signal(true);
 
@@ -113,9 +115,9 @@ export class UiPreloader {
       this.ctx.add(() => {
         gsap
           .timeline({ defaults: { ease: 'expo.out' } })
-          .from(backdrop, { scale: 1.12, autoAlpha: 0, duration: 1.6, ease: 'power2.out' })
-          .from(lockup.children[0], { y: 36, scale: 0.9, autoAlpha: 0, duration: 1.1 }, 0.15)
-          .from(lockup.children[1], { x: -28, autoAlpha: 0, duration: 1.1 }, 0.35);
+          .from(backdrop, { scale: 1.12, autoAlpha: 0, duration: 2.4, ease: 'power2.out' })
+          .from(lockup.children[0], { y: 36, scale: 0.9, autoAlpha: 0, duration: 1.6 }, 0.3)
+          .from(lockup.children[1], { x: -28, autoAlpha: 0, duration: 1.6 }, 0.65);
       });
     }
 
@@ -140,11 +142,11 @@ export class UiPreloader {
       const travel = curtain.offsetHeight;
       gsap
         .timeline({ onComplete: () => this.finish() })
-        .to(lockup, { y: -48, autoAlpha: 0, duration: 0.7, ease: 'power2.in' }, 0)
+        .to(lockup, { y: -48, autoAlpha: 0, duration: 1, ease: 'power2.in' }, 0)
         // The curtain rises while its contents are held back, so the photo drifts up
         // slower than the edge and the reveal has depth.
-        .to(curtain, { y: -travel, duration: 1.4, ease: 'power3.inOut' }, 0.3)
-        .to(stage, { y: travel * STAGE_COUNTER, duration: 1.4, ease: 'power3.inOut' }, 0.3);
+        .to(curtain, { y: -travel, duration: 2, ease: 'power3.inOut' }, 0.45)
+        .to(stage, { y: travel * STAGE_COUNTER, duration: 2, ease: 'power3.inOut' }, 0.45);
     });
   }
 

@@ -17,6 +17,7 @@
   "nav.cart": "Cart",
   "nav.language": "العربية",
   "nav.languageLabel": "Change language",
+  "nav.theme": "Switch colour scheme",
   "search.placeholder": "Search by title, author or ISBN",
   "search.submit": "Search",
   "search.resultsFor": "Results for \"{term}\"",
