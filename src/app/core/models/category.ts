@@ -43,9 +43,6 @@ export interface AdminCategoryNode {
   /** Whether the storefront shows it. */
   isActive: boolean;
 
-  /** Position among its siblings. */
-  sortOrder: number;
-
   /** Books filed directly in this category. */
   directBookCount: number;
 
@@ -57,16 +54,16 @@ export interface AdminCategoryNode {
 
 export interface CreateCategoryRequest {
   nameAr: string;
+
+  /** Optional; empty when the category has no English name. */
   nameEn: string;
 
   /** The parent, or null for a main category. */
   parentId: string | null;
-  sortOrder: number;
 }
 
 export interface UpdateCategoryRequest {
   nameAr: string;
   nameEn: string;
-  sortOrder: number;
   isActive: boolean;
 }

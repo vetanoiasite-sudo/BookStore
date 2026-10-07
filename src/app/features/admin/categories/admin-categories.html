@@ -39,23 +39,10 @@
           <label class="bs-label" for="category-name-en">{{ 'admin.categories.nameEn' | t }}</label>
           <input id="category-name-en" class="bs-input" dir="ltr" formControlName="nameEn" />
           @if (form.controls.nameEn.touched && form.controls.nameEn.invalid) {
-            <p class="bs-error">{{ 'admin.categories.nameRequired' | t }}</p>
+            <p class="bs-error">{{ 'admin.categories.nameTooLong' | t }}</p>
           } @else if (current.kind === 'create') {
             <p class="bs-hint">{{ 'admin.categories.slugHint' | t }}</p>
           }
-        </div>
-
-        <div class="bs-field">
-          <label class="bs-label" for="category-order">{{ 'admin.categories.sortOrder' | t }}</label>
-          <input
-            id="category-order"
-            class="bs-input"
-            type="number"
-            min="0"
-            max="9999"
-            formControlName="sortOrder"
-          />
-          <p class="bs-hint">{{ 'admin.categories.sortHint' | t }}</p>
         </div>
 
         @if (current.kind === 'edit') {
@@ -122,7 +109,9 @@
     <div class="row" [class.row--hidden]="!node.isActive">
       <div class="row__name">
         <span class="row__title">{{ name(node) }}</span>
-        <span class="row__other">{{ translations.language() === 'ar' ? node.nameEn : node.nameAr }}</span>
+        @if (otherName(node); as other) {
+          <span class="row__other">{{ other }}</span>
+        }
       </div>
 
       <div class="row__meta">

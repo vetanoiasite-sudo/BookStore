@@ -373,9 +373,10 @@
   flex: 1;
 }
 
+// Four columns over the deep plum: the brand and its pitch, then three link groups.
 .footer {
   margin-block-start: var(--bs-space-8);
-  padding-block: var(--bs-space-7) 0;
+  padding-block-start: var(--bs-space-7);
   background: var(--bs-ink-deep);
   color: var(--bs-text-inverse);
 }
@@ -385,47 +386,131 @@
   gap: var(--bs-space-6);
   grid-template-columns: 1fr;
 
-  @include m.from(t.$bs-bp-md) {
-    grid-template-columns: 2fr 1fr 1fr;
+  @include m.from(t.$bs-bp-sm) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  @include m.from(t.$bs-bp-lg) {
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
   }
 }
 
-.footer__title {
-  margin: 0 0 var(--bs-space-3);
-  color: var(--bs-highlight);
-  font-size: var(--bs-text-lg);
+.footer__about {
+  @include m.from(t.$bs-bp-sm) {
+    grid-column: 1 / -1;
+  }
+
+  @include m.from(t.$bs-bp-lg) {
+    grid-column: auto;
+  }
+}
+
+.footer__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bs-space-2);
+  color: var(--bs-text-inverse);
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.footer__mark {
+  width: auto;
+  height: 3rem;
+}
+
+.footer__brand-text {
+  display: grid;
+  line-height: 1.15;
+}
+
+.footer__brand-name {
+  font-family: var(--bs-font-display);
+  font-size: var(--bs-text-xl);
+  font-weight: 600;
+}
+
+.footer__brand-by {
+  color: rgb(255 255 255 / 65%);
+  font-size: var(--bs-text-xs);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .footer__text {
-  margin: 0;
-  max-width: 46ch;
-  color: rgb(255 255 255 / 75%);
+  margin: var(--bs-space-4) 0 0;
+  max-width: 40ch;
+  color: rgb(255 255 255 / 72%);
   font-size: var(--bs-text-sm);
+  line-height: 1.9;
+}
+
+.footer__title {
+  margin: 0 0 var(--bs-space-4);
+  color: var(--bs-text-inverse);
+  font-size: var(--bs-text-sm);
+  font-weight: 700;
 }
 
 .footer__list {
   display: grid;
-  gap: var(--bs-space-2);
+  gap: var(--bs-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 
   a {
-    color: var(--bs-bg);
+    color: rgb(255 255 255 / 72%);
     font-size: var(--bs-text-sm);
 
     &:hover {
       color: var(--bs-highlight);
+      text-decoration: none;
     }
   }
 }
 
-// Full-bleed credits strip in the slightly lighter plum, as on SuperPark.
-.footer__rights {
-  margin: var(--bs-space-6) 0 0;
-  padding-block: var(--bs-space-4);
-  box-shadow: 0 0 0 100vmax var(--bs-ink);
-  clip-path: inset(0 -100vmax);
-  background: var(--bs-ink);
-  text-align: center;
-  color: rgb(255 255 255 / 70%);
-  font-size: var(--bs-text-xs);
+// The "solution by" badge for the company behind the store.
+.footer__vendor {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bs-space-3);
+  margin-block-end: var(--bs-space-4);
+  padding: var(--bs-space-3) var(--bs-space-4);
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 5%);
 }
 
+.footer__vendor-logo {
+  font-family: var(--bs-font-display);
+  font-size: var(--bs-text-base);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.footer__vendor-text {
+  display: grid;
+  color: rgb(255 255 255 / 72%);
+  font-size: var(--bs-text-xs);
+  line-height: 1.4;
+}
+
+.footer__bottom {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--bs-space-2) var(--bs-space-4);
+  margin-block-start: var(--bs-space-7);
+  padding-block: var(--bs-space-5);
+  border-block-start: 1px solid rgb(255 255 255 / 12%);
+  color: rgb(255 255 255 / 55%);
+  font-size: var(--bs-text-xs);
+
+  p {
+    margin: 0;
+  }
+}

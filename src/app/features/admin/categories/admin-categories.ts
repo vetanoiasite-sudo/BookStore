@@ -59,8 +59,7 @@ export class AdminCategories {
 
   protected readonly form = this.builder.nonNullable.group({
     nameAr: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(150)]],
-    nameEn: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(150)]],
-    sortOrder: [0, [Validators.min(0), Validators.max(9999)]],
+    nameEn: ['', [Validators.maxLength(150)]],
     isActive: [true],
     parentId: [''],
   });
@@ -105,9 +104,18 @@ export class AdminCategories {
     return depth + 1 < MAX_DEPTH;
   }
 
-  /** The category's name in the active language. */
+  /** The category's name in the active language; the Arabic one when there is no English name. */
   protected name(node: AdminCategoryNode): string {
-    return this.translations.language() === 'ar' ? node.nameAr : node.nameEn;
+    return this.translations.language() === 'ar' ? node.nameAr : node.nameEn || node.nameAr;
+  }
+
+  /** The name in the other language, or nothing when there is no English name to show beside it. */
+  protected otherName(node: AdminCategoryNode): string {
+    if (!node.nameEn) {
+      return '';
+    }
+
+    return this.translations.language() === 'ar' ? node.nameEn : node.nameAr;
   }
 
   protected load(): void {
@@ -130,7 +138,6 @@ export class AdminCategories {
     this.form.reset({
       nameAr: '',
       nameEn: '',
-      sortOrder: parent ? parent.children.length : this.tree().length,
       isActive: true,
       parentId: parent?.id ?? '',
     });
@@ -144,7 +151,6 @@ export class AdminCategories {
     this.form.reset({
       nameAr: node.nameAr,
       nameEn: node.nameEn,
-      sortOrder: node.sortOrder,
       isActive: node.isActive,
       parentId: parentId ?? '',
     });
@@ -174,7 +180,6 @@ export class AdminCategories {
       action = this.backOffice.createCategory({
         ...names,
         parentId: editing.parent?.id ?? null,
-        sortOrder: value.sortOrder,
       });
     } else {
       // A rename and a move are separate calls on the server. The move goes second
@@ -182,7 +187,6 @@ export class AdminCategories {
       action = this.backOffice
         .updateCategory(editing.node.id, {
           ...names,
-          sortOrder: value.sortOrder,
           isActive: value.isActive,
         })
         .pipe(

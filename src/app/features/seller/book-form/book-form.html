@@ -57,24 +57,8 @@
       <form class="bs-card bs-form" [formGroup]="form" (ngSubmit)="save()" novalidate>
         <h2 class="bs-card__title">{{ 'seller.form.section.book' | t }}</h2>
 
-        @if (editable()) {
-          <div class="assist">
-            <label class="bs-button bs-button--ghost assist__button">
-              <input
-                type="file"
-                accept="image/*"
-                hidden
-                [disabled]="recognising()"
-                (change)="recognise($event)"
-              />
-              {{ (recognising() ? 'seller.form.recognising' : 'seller.form.recognise') | t }}
-            </label>
-            <p class="bs-hint">{{ 'seller.form.recognise.hint' | t }}</p>
-          </div>
-        }
-
         <div class="bs-field">
-          <label class="bs-label" for="title">{{ 'seller.form.field.title' | t }}</label>
+          <label class="bs-label required" for="title">{{ 'seller.form.field.title' | t }}</label>
           <input id="title" class="bs-input" type="text" formControlName="title" />
           @if (errorFor('title'); as message) {
             <p class="bs-error">{{ message }}</p>
@@ -85,7 +69,7 @@
 
         <div class="grid-2">
           <div class="bs-field">
-            <label class="bs-label" for="category">{{ 'seller.form.field.category' | t }}</label>
+            <label class="bs-label required" for="category">{{ 'seller.form.field.category' | t }}</label>
             <select id="category" class="bs-select" formControlName="categorySlug">
               <option value="">{{ 'seller.form.field.categoryPlaceholder' | t }}</option>
               @for (option of options(); track option.slug) {
@@ -100,7 +84,7 @@
           </div>
 
           <div class="bs-field">
-            <label class="bs-label" for="price">{{ 'seller.form.field.price' | t }}</label>
+            <label class="bs-label required" for="price">{{ 'seller.form.field.price' | t }}</label>
             <input id="price" class="bs-input" type="number" min="1" step="1" formControlName="price" />
             @if (errorFor('price'); as message) {
               <p class="bs-error">{{ message }}</p>
@@ -146,16 +130,18 @@
           </div>
 
           <div class="bs-field">
-            <label class="bs-label" for="pages">{{ 'seller.form.field.pages' | t }}</label>
-            <input id="pages" class="bs-input" type="number" formControlName="pageCount" />
+            <label class="bs-label required" for="pages">{{ 'seller.form.field.pages' | t }}</label>
+            <input id="pages" class="bs-input" type="number" min="1" step="1" formControlName="pageCount" />
             @if (errorFor('pageCount'); as message) {
               <p class="bs-error">{{ message }}</p>
+            } @else if (form.controls.pageCount.touched && form.controls.pageCount.invalid) {
+              <p class="bs-error">{{ 'seller.form.error.pages' | t }}</p>
             }
           </div>
         </div>
 
         <div class="bs-field">
-          <label class="bs-label" for="language">{{ 'seller.form.field.language' | t }}</label>
+          <label class="bs-label required" for="language">{{ 'seller.form.field.language' | t }}</label>
           <select id="language" class="bs-select" formControlName="language">
             @for (language of languages; track language) {
               <option [value]="language">{{ 'language.' + language | t }}</option>
@@ -179,7 +165,7 @@
 
         <div class="grid-3" formGroupName="condition">
           <div class="bs-field">
-            <label class="bs-label" for="grade">{{ 'seller.form.field.grade' | t }}</label>
+            <label class="bs-label required" for="grade">{{ 'seller.form.field.grade' | t }}</label>
             <select id="grade" class="bs-select" formControlName="grade">
               @for (grade of grades; track grade) {
                 <option [value]="grade">{{ grade | conditionLabel }}</option>
@@ -257,18 +243,15 @@
         @if (editable()) {
           <div class="actions">
             <button class="bs-button" type="submit" [disabled]="saving()">
-              {{ (saving() ? 'common.saving' : 'common.save') | t }}
+              {{ (saving() ? 'common.saving' : 'seller.books.submit') | t }}
             </button>
 
-            @if (canSubmit()) {
-              <button
-                class="bs-button bs-button--ghost"
-                type="button"
-                [disabled]="saving()"
-                (click)="submitForReview()"
-              >
-                {{ 'seller.books.submit' | t }}
-              </button>
+            @if (formErrors().length > 0) {
+              <ul class="actions__errors" role="alert">
+                @for (message of formErrors(); track message.text) {
+                  <li>{{ message.translate ? (message.text | t) : message.text }}</li>
+                }
+              </ul>
             }
           </div>
         }
@@ -279,7 +262,41 @@
           <h2 class="bs-card__title">{{ 'seller.form.section.photos' | t }}</h2>
 
           @if (isNew()) {
-            <p class="bs-hint">{{ 'seller.form.photos.saveFirst' | t }}</p>
+            @if (pending().length === 0) {
+              <p class="bs-hint">{{ 'seller.form.photos.empty' | t }}</p>
+            } @else {
+              <ul class="photos">
+                @for (photo of pending(); track photo.preview; let index = $index) {
+                  <li class="photo">
+                    <img class="photo__image" [src]="photo.preview" [alt]="photo.file.name" />
+                    <span class="photo__type">
+                      {{ (index === 0 ? 'imageType.cover' : 'imageType.other') | t }}
+                    </span>
+                    <button type="button" class="photo__remove" (click)="removePending(index)">
+                      {{ 'common.delete' | t }}
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+
+            @if (canAddPhoto()) {
+              <label class="bs-button bs-button--ghost bs-button--block upload">
+                <input
+                  type="file"
+                  [accept]="photoPicker"
+                  hidden
+                  [disabled]="preparing()"
+                  (change)="choosePhotograph($event)"
+                />
+                @if (preparing()) {
+                  {{ 'seller.form.photos.preparing' | t }}
+                } @else {
+                  {{ (pending().length === 0 ? 'seller.form.photos.addCover' : 'seller.form.photos.add') | t }}
+                }
+              </label>
+            }
+            <p class="bs-hint">{{ 'seller.form.photos.hint' | t: { max: maxPhotos } }}</p>
           } @else if (book(); as current) {
             @if (current.images.length === 0) {
               <p class="bs-hint">{{ 'seller.form.photos.empty' | t }}</p>
@@ -312,18 +329,28 @@
             }
 
             @if (current.isEditable) {
-              <label class="bs-button bs-button--ghost bs-button--block upload">
-                <input
-                  type="file"
-                  accept="image/*"
-                  hidden
-                  [disabled]="uploading()"
-                  (change)="addPhotograph($event)"
-                />
-                {{ (uploading() ? 'seller.form.photos.uploading' : 'seller.form.photos.add') | t }}
-              </label>
-              <p class="bs-hint">{{ 'seller.form.photos.hint' | t }}</p>
+              @if (canAddPhoto()) {
+                <label class="bs-button bs-button--ghost bs-button--block upload">
+                  <input
+                    type="file"
+                    [accept]="photoPicker"
+                    hidden
+                    [disabled]="uploading() || preparing()"
+                    (change)="addPhotograph($event)"
+                  />
+                  @if (preparing()) {
+                    {{ 'seller.form.photos.preparing' | t }}
+                  } @else {
+                    {{ (uploading() ? 'seller.form.photos.uploading' : 'seller.form.photos.add') | t }}
+                  }
+                </label>
+              }
+              <p class="bs-hint">{{ 'seller.form.photos.hint' | t: { max: maxPhotos } }}</p>
             }
+          }
+
+          @if (photoError(); as message) {
+            <p class="bs-error" role="alert">{{ message | t }}</p>
           }
         </section>
 

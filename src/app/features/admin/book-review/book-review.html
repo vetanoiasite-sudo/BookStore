@@ -79,7 +79,7 @@
               </div>
               <div class="facts__row">
                 <dt>{{ 'seller.form.field.category' | t }}</dt>
-                <dd>{{ current.categoryNameAr }} / {{ current.categoryNameEn }}</dd>
+                <dd>{{ current.categoryNameAr }}@if (current.categoryNameEn) { / {{ current.categoryNameEn }}}</dd>
               </div>
               <div class="facts__row">
                 <dt>{{ 'seller.form.field.author' | t }}</dt>

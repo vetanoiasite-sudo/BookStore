@@ -4,7 +4,6 @@ import { ApiClient, QueryParams } from '../http/api-client';
 import type { PagedResult } from '../models/api-response';
 import type { BookImageType } from '../models/book';
 import type {
-  BookRecognitionResult,
   SaveSellerBookRequest,
   SellerBookDetails,
   SellerBookImage,
@@ -36,10 +35,23 @@ export class SellerService {
     return this.api.get<SellerBookDetails>(`/seller/books/${encodeURIComponent(publicId)}`);
   }
 
-  create(request: SaveSellerBookRequest): Observable<SellerBookDetails> {
-    return this.api.post<SellerBookDetails>('/seller/books', request);
+  /**
+   * Lists a copy with its photographs and sends it straight for review. The listing
+   * travels as JSON in the form, next to the cover and up to three more photographs.
+   */
+  create(request: SaveSellerBookRequest, cover: File, photos: File[]): Observable<SellerBookDetails> {
+    const form = new FormData();
+    form.append('data', JSON.stringify(request));
+    form.append('cover', cover);
+
+    for (const photo of photos) {
+      form.append('photos', photo);
+    }
+
+    return this.api.upload<SellerBookDetails>('/seller/books', form);
   }
 
+  /** Saves the fix to a rejected listing, which sends it for review again. */
   update(publicId: string, request: SaveSellerBookRequest): Observable<SellerBookDetails> {
     return this.api.put<SellerBookDetails>(
       `/seller/books/${encodeURIComponent(publicId)}`,
@@ -52,7 +64,7 @@ export class SellerService {
     return this.api.delete<unknown>(`/seller/books/${encodeURIComponent(publicId)}`);
   }
 
-  /** Sends the listing for review, or resends it after a rejection. */
+  /** Sends a listing for review. Only listings left as drafts before drafts were dropped need this. */
   submit(publicId: string): Observable<SellerBookDetails> {
     return this.api.post<SellerBookDetails>(
       `/seller/books/${encodeURIComponent(publicId)}/submit`,
@@ -91,13 +103,5 @@ export class SellerService {
     return this.api.delete<unknown>(
       `/seller/books/${encodeURIComponent(publicId)}/images/${imageId}`,
     );
-  }
-
-  /** Suggests book details from a photograph. Nothing is saved. */
-  recognize(file: File): Observable<BookRecognitionResult> {
-    const form = new FormData();
-    form.append('file', file);
-
-    return this.api.upload<BookRecognitionResult>('/seller/books/recognize', form);
   }
 }
